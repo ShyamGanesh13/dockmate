@@ -345,7 +345,15 @@ fn run_command(app: &AppHandle, state: &AppState, cmd: Command) -> Answer {
             }
         }
         Command::Stop => {
-            let was = state.rt.lock().unwrap().session_end.take().is_some();
+            let was = {
+                let mut rt = state.rt.lock().unwrap();
+                // Clear both: a paused session lives in session_paused, a running
+                // one in session_end. Taking only session_end left a paused
+                // session stuck "active" and blocked the next /timer.
+                let running = rt.session_end.take().is_some();
+                let paused = rt.session_paused.take().is_some();
+                running || paused
+            };
             let _ = app.emit("session-stopped", ());
             Answer::command(if was { "Focus session stopped." } else { "No focus session was running." })
         }

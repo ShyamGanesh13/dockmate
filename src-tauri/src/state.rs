@@ -29,13 +29,15 @@ pub struct PetCfg {
     pub follow: bool,
     /// Peek mode: stay hidden off-screen and only slide up for a nudge
     /// (reminder, routine, water, timer end), then slide away.
-    #[serde(default = "default_true")]
+    /// Off by default so a fresh install shows the pet on screen right away
+    /// (peek keeps it tucked off-screen, which reads as "nothing launched").
+    #[serde(default)]
     pub peek: bool,
 }
 
 impl Default for PetCfg {
     fn default() -> Self {
-        Self { user_name: String::new(), scale: 1.0, speed: 1.0, wander: true, sleepy: true, follow: true, peek: true }
+        Self { user_name: String::new(), scale: 1.0, speed: 1.0, wander: true, sleepy: true, follow: true, peek: false }
     }
 }
 

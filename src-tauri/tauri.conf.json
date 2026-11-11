@@ -34,7 +34,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["app", "dmg"],
+    "targets": ["app"],
     "category": "Productivity",
     "shortDescription": "A desktop companion that lives above your Dock",
     "icon": [
