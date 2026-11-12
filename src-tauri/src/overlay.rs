@@ -111,7 +111,7 @@ pub fn reconcile_pets(app: &AppHandle) {
             }
             None => {
                 let built = WebviewWindowBuilder::new(app, &label, WebviewUrl::App("pet.html".into()))
-                    .title("FocusMe")
+                    .title("Dockmate")
                     .inner_size(900.0, 600.0)
                     .position(m.work_area().position.x as f64 / m.scale_factor(), m.work_area().position.y as f64 / m.scale_factor())
                     .transparent(true)
@@ -143,7 +143,7 @@ pub fn reconcile_pets(app: &AppHandle) {
     }
 
     // Monitor gone: hide its overlay, never close it. Closing crashes the app —
-    // the window was re-classed into FocusMePanel (pin_above_everything), which
+    // the window was re-classed into DockmatePanel (pin_above_everything), which
     // clobbers AppKit's KVO class swizzle, so WebKit's removeObserver on
     // teardown throws and aborts. A hidden overlay is reused if a monitor returns.
     let n = ordered.len().max(1);
@@ -239,7 +239,7 @@ pub fn pin_above_everything(win: &WebviewWindow) {
 pub fn pin_above_everything(_win: &WebviewWindow) {}
 
 #[allow(unexpected_cfgs)]
-/// `FocusMePanel`: an NSPanel that can become key (so the chat box takes
+/// `DockmatePanel`: an NSPanel that can become key (so the chat box takes
 /// typing) but never main. Registered once with the ObjC runtime.
 #[cfg(target_os = "macos")]
 fn panel_class() -> Option<&'static objc::runtime::Class> {
@@ -254,8 +254,8 @@ fn panel_class() -> Option<&'static objc::runtime::Class> {
     static CLS: OnceLock<usize> = OnceLock::new();
     let p = *CLS.get_or_init(|| {
         let Some(sup) = Class::get("NSPanel") else { return 0 };
-        let Some(mut d) = ClassDecl::new("FocusMePanel", sup) else {
-            return Class::get("FocusMePanel").map_or(0, |c| c as *const Class as usize);
+        let Some(mut d) = ClassDecl::new("DockmatePanel", sup) else {
+            return Class::get("DockmatePanel").map_or(0, |c| c as *const Class as usize);
         };
         unsafe {
             d.add_method(sel!(canBecomeKeyWindow), yes as extern "C" fn(&Object, Sel) -> BOOL);
@@ -402,7 +402,7 @@ pub fn open_settings(app: &AppHandle) {
         return;
     }
     let built = WebviewWindowBuilder::new(app, "settings", WebviewUrl::App("settings.html".into()))
-        .title("FocusMe Settings")
+        .title("Dockmate Settings")
         .inner_size(620.0, 680.0)
         .min_inner_size(520.0, 520.0)
         .center()
@@ -414,17 +414,17 @@ pub fn open_settings(app: &AppHandle) {
 }
 
 pub fn build_tray(app: &App) -> tauri::Result<()> {
-    let chat = MenuItem::with_id(app, "chat", "Talk to FocusMe", true, None::<&str>)?;
+    let chat = MenuItem::with_id(app, "chat", "Talk to Dockmate", true, None::<&str>)?;
     let focus = MenuItem::with_id(app, "focus", "Start focus session", true, None::<&str>)?;
     let toggle = MenuItem::with_id(app, "toggle", "Show / hide pet", true, None::<&str>)?;
     let settings = MenuItem::with_id(app, "settings", "Settings…", true, Some("CmdOrCtrl+,"))?;
-    let quit = MenuItem::with_id(app, "quit", "Quit FocusMe", true, Some("CmdOrCtrl+Q"))?;
+    let quit = MenuItem::with_id(app, "quit", "Quit Dockmate", true, Some("CmdOrCtrl+Q"))?;
     let sep = PredefinedMenuItem::separator(app)?;
     let sep2 = PredefinedMenuItem::separator(app)?;
     let menu = Menu::with_items(app, &[&chat, &focus, &sep, &toggle, &settings, &sep2, &quit])?;
 
     let mut tray = TrayIconBuilder::with_id("main")
-        .tooltip("FocusMe")
+        .tooltip("Dockmate")
         .menu(&menu)
         .on_menu_event(|app, event| match event.id.as_ref() {
             "chat" => {

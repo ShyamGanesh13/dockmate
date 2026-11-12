@@ -140,7 +140,7 @@ fn beat(app: &AppHandle) {
             rt.last_water = now;
             drop(rt);
             eprintln!("[focusme/water] firing water nudge");
-            notify("FocusMe", "Time for a sip of water.");
+            notify("Dockmate", "Time for a sip of water.");
             let _ = app.emit("water", ());
         }
     } else if cfg.water.enabled && now.timestamp() % 30 == 0 {

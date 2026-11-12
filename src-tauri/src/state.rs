@@ -144,7 +144,7 @@ pub struct Config {
     pub routines: Vec<Routine>,
     /// Reminders that repeat every day at a set time.
     pub daily: Vec<DailyReminder>,
-    /// Launch FocusMe automatically when you log in. On by default; the OS
+    /// Launch Dockmate automatically when you log in. On by default; the OS
     /// login item is kept in sync with this on every startup.
     #[serde(default = "default_true")]
     pub login_item: bool,

@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 #
-# Publish a new FocusMe release for friends.
+# Publish a new Dockmate release for friends.
 #
 #   ./scripts/release.sh 0.2.0
 #
 # Bumps the version, commits, tags v0.2.0 and pushes. GitHub Actions
-# (.github/workflows/release.yml) then builds the app and puts FocusMe.zip on
+# (.github/workflows/release.yml) then builds the app and puts Dockmate.zip on
 # https://github.com/ShyamGanesh13/focusme/releases/latest (~5–10 min).
 # Installed copies notice the new version within a day and show an Update bubble.
 #

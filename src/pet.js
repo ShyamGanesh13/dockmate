@@ -458,7 +458,7 @@ const COMMANDS = [
   ["/hide", "", "Hide the pet"],
   ["/settings", "", "Open Settings"],
   ["/help", "", "Everything I understand"],
-  ["/quit", "", "Quit FocusMe"],
+  ["/quit", "", "Quit Dockmate"],
 ];
 const QUESTIONS = [
   ["battery?", "Charge and power"],
@@ -802,7 +802,7 @@ listen("routine", ({ payload: r }) => {
 listen("update-available", ({ payload: u }) => {
   touched();
   peekFor(PEEK.nudge);
-  say(`FocusMe ${u.version} is out!`, {
+  say(`Dockmate ${u.version} is out!`, {
     ms: 0, alert: true, small: "Update",
     actions: [
       { label: "Download", act: () => invoke("open_release", { url: u.url }) },

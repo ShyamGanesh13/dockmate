@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# Build FocusMe as a real macOS app, install it to ~/Applications, and launch it.
+# Build Dockmate as a real macOS app, install it to ~/Applications, and launch it.
 # (~/Applications, not /Applications: it never needs admin rights or the
 # "App Management" permission, which some managed Macs only grant temporarily.)
-# After this you never need a terminal again: FocusMe runs in the menu bar as a
+# After this you never need a terminal again: Dockmate runs in the menu bar as a
 # background app, survives closing the terminal, and (with "Open at login" on,
 # the default) relaunches after a restart.
 #
@@ -15,7 +15,7 @@ cd "$(dirname "$0")/.."
 # shellcheck disable=SC1090
 . "$HOME/.cargo/env" 2>/dev/null || true
 
-APP_NAME="FocusMe.app"
+APP_NAME="Dockmate.app"
 BUNDLE="src-tauri/target/release/bundle/macos/$APP_NAME"
 DIR="$HOME/Applications"
 DEST="$DIR/$APP_NAME"
@@ -29,9 +29,9 @@ if [ ! -d "$BUNDLE" ]; then
   exit 1
 fi
 
-echo "▶ Quitting any running FocusMe so the new build takes over…"
-osascript -e 'quit app "FocusMe"' >/dev/null 2>&1 || true
-pkill -f "FocusMe.app/Contents/MacOS/deskpal" >/dev/null 2>&1 || true
+echo "▶ Quitting any running Dockmate so the new build takes over…"
+osascript -e 'quit app "Dockmate"' >/dev/null 2>&1 || true
+pkill -f "Dockmate.app/Contents/MacOS/deskpal" >/dev/null 2>&1 || true
 sleep 1
 
 echo "▶ Installing to ${DEST}…"
@@ -46,7 +46,7 @@ open -n "$DEST"
 
 cat <<'DONE'
 
-✓ FocusMe is installed and running in the menu bar.
+✓ Dockmate is installed and running in the menu bar.
   • You can close this terminal — it keeps running on its own.
   • It relaunches automatically when you log in (Settings → General → "Open at login").
   • Quit it anytime from the menu-bar icon or the pet's menu.

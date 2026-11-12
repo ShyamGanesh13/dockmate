@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "FocusMe",
+  "productName": "Dockmate",
   "version": "0.2.7",
   "identifier": "com.shyamganesh.deskpal",
   "build": {
@@ -13,7 +13,7 @@
       {
         "label": "pet",
         "url": "pet.html",
-        "title": "FocusMe",
+        "title": "Dockmate",
         "width": 900,
         "height": 600,
         "transparent": true,

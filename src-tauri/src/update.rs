@@ -1,4 +1,4 @@
-//! Once a day, ask GitHub Releases whether a newer FocusMe is out and, if so,
+//! Once a day, ask GitHub Releases whether a newer Dockmate is out and, if so,
 //! tell the pets (they show an "Update" bubble with a Download button).
 //!
 //! Reads the redirect of `/releases/latest` (→ `/releases/tag/vX.Y.Z`) rather

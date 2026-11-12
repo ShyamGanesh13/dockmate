@@ -1,9 +1,9 @@
-# FocusMe — project guide for Claude Code
+# Dockmate — project guide for Claude Code
 
 A macOS desktop-companion ("desk pet") built with **Tauri 2 (Rust) + vanilla JS**
 (no bundler, no Electron). The pet floats over everything — including other apps'
 full-screen Spaces — on **every monitor**, and nudges you about water, reminders,
-routines and focus sessions. Crate name is `deskpal`; product name is **FocusMe**;
+routines and focus sessions. Crate name is `deskpal`; product name is **Dockmate**;
 bundle id `com.shyamganesh.deskpal`.
 
 ## Run / build / test
@@ -17,7 +17,7 @@ npm run build                 # release .app + .dmg in src-tauri/target/release/
 npm run preview               # frontend only, in a browser, against lib/bridge.js mock
 ```
 
-The installed `~/Applications/FocusMe.app` is a frozen build — re-run `install-mac.sh`
+The installed `~/Applications/Dockmate.app` is a frozen build — re-run `install-mac.sh`
 to update it. Unsigned, so first launch may need right-click → Open.
 
 ## Architecture
@@ -84,7 +84,7 @@ to update it. Unsigned, so first launch may need right-click → Open.
 - Remote is `github.com/ShyamGanesh13/focusme` (branch `main`). Push with a PAT.
 - **Releases:** `./scripts/release.sh X.Y.Z` bumps `tauri.conf.json`/`package.json`, tags
   `vX.Y.Z`, pushes; `.github/workflows/release.yml` (macos-14, Apple Silicon) builds and
-  attaches `FocusMe.zip`. `update.rs` checks `/releases/latest`'s redirect once a day (not
+  attaches `Dockmate.zip`. `update.rs` checks `/releases/latest`'s redirect once a day (not
   the REST API — rate-limited on shared office IPs) and emits `update-available`.
 - Roadmap left (see README): browser-tab budget, in-place auto-install of updates,
   signed/notarised releases, Windows build.

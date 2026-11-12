@@ -1,5 +1,5 @@
-# Push a tag like v0.2.0 (scripts/release.sh does it) → GitHub builds FocusMe
-# for Apple Silicon and publishes FocusMe.zip on the Releases page.
+# Push a tag like v0.2.0 (scripts/release.sh does it) → GitHub builds Dockmate
+# for Apple Silicon and publishes Dockmate.zip on the Releases page.
 name: Release
 
 on:
@@ -37,21 +37,21 @@ jobs:
       - run: npx tauri build --bundles app
 
       - name: Zip the app
-        run: ditto -c -k --keepParent src-tauri/target/release/bundle/macos/FocusMe.app FocusMe.zip
+        run: ditto -c -k --keepParent src-tauri/target/release/bundle/macos/Dockmate.app Dockmate.zip
 
       - uses: softprops/action-gh-release@v3
         with:
-          files: FocusMe.zip
+          files: Dockmate.zip
           body: |
             **Apple Silicon Macs (M1 and later).**
 
             ### Install or update
-            1. Quit FocusMe if it's running (menu-bar icon → Quit).
-            2. Download **FocusMe.zip** below and double-click it to unzip.
-            3. Drag **FocusMe.app** into **Applications** (choose *Replace* if asked).
+            1. Quit Dockmate if it's running (menu-bar icon → Quit).
+            2. Download **Dockmate.zip** below and double-click it to unzip.
+            3. Drag **Dockmate.app** into **Applications** (choose *Replace* if asked).
             4. Open it. It isn't signed by Apple, so the first time macOS blocks it:
                open **System Settings → Privacy & Security**, scroll down and click **Open Anyway**.
                If macOS says the app is *damaged*, run this once in Terminal, then open it again:
-               `xattr -dr com.apple.quarantine /Applications/FocusMe.app`
+               `xattr -dr com.apple.quarantine /Applications/Dockmate.app`
 
             Your settings, notes and reminders are kept between versions.

@@ -1,4 +1,4 @@
-# FocusMe · DeskPal
+# Dockmate · DeskPal
 
 A desktop companion for **macOS** that floats over everything — including other apps'
 full-screen Spaces — on **every monitor**. Triple-tap it to chat: ask about your battery,
@@ -18,9 +18,9 @@ and everything stays on your Mac.
 
 ## Download (no build needed)
 
-Grab **FocusMe.zip** from the [latest release](https://github.com/ShyamGanesh13/focusme/releases/latest)
-(Apple Silicon Macs), unzip, drag **FocusMe.app** into Applications. The release page
-has the one-time "Open Anyway" step for unsigned apps. Once installed, FocusMe checks
+Grab **Dockmate.zip** from the [latest release](https://github.com/ShyamGanesh13/focusme/releases/latest)
+(Apple Silicon Macs), unzip, drag **Dockmate.app** into Applications. The release page
+has the one-time "Open Anyway" step for unsigned apps. Once installed, Dockmate checks
 for a new release once a day and Pip offers a **Download** button when one is out.
 
 To publish a release: `./scripts/release.sh 0.2.0` (bumps the version, tags, pushes;
@@ -33,7 +33,7 @@ GitHub Actions builds and uploads the zip in ~5–10 min).
 ./scripts/install-mac.sh   # build + install to ~/Applications + launch (the everyday way)
 ```
 
-`install-mac.sh` builds FocusMe, installs it to `~/Applications` (no admin needed), and launches it as a
+`install-mac.sh` builds Dockmate, installs it to `~/Applications` (no admin needed), and launches it as a
 background menu-bar app — **you can then close the terminal and it keeps running**, and it
 relaunches at login. Re-run the script any time to update the installed app to your latest
 code. (First launch of an unsigned build may need a right-click → Open; see Development.)
@@ -42,7 +42,7 @@ For hacking on it, use the dev server instead, which rebuilds on save but must s
 foreground:
 
 ```bash
-npm run dev                # launch FocusMe in development (keep this terminal open)
+npm run dev                # launch Dockmate in development (keep this terminal open)
 ```
 
 Its menu-bar icon has Talk, Focus, Show/Hide, Settings and Quit.
@@ -124,8 +124,8 @@ npm run build                          # .app + .dmg in src-tauri/target/release
 ./scripts/install-mac.sh               # build + install to ~/Applications + relaunch
 ```
 
-The unsigned build may be blocked on first launch. To open it, right-click FocusMe.app →
-Open, or run `xattr -dr com.apple.quarantine FocusMe.app`. Transparent windows use Tauri's
+The unsigned build may be blocked on first launch. To open it, right-click Dockmate.app →
+Open, or run `xattr -dr com.apple.quarantine Dockmate.app`. Transparent windows use Tauri's
 `macOSPrivateApi`, which is fine for direct distribution but not for the Mac App Store.
 
 ## Background

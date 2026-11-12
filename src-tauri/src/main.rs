@@ -27,7 +27,7 @@ fn main() {
             app.manage(state::AppState::load(dir));
 
             // Keep the OS login item in step with the setting on every launch.
-            // Defaults to on, so a freshly installed FocusMe registers itself to
+            // Defaults to on, so a freshly installed Dockmate registers itself to
             // start at login; the installed app's path is what gets registered.
             {
                 use tauri_plugin_autostart::ManagerExt;
@@ -79,5 +79,5 @@ fn main() {
             commands::reset_character,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running FocusMe");
+        .expect("error while running Dockmate");
 }
