@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: macos-latest # GitHub-hosted Apple Silicon
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Check the tag matches the app version
         run: |
@@ -21,7 +21,7 @@ jobs:
           have=$(node -p "require('./src-tauri/tauri.conf.json').version")
           [ "$want" = "$have" ] || { echo "Tag $GITHUB_REF_NAME but tauri.conf.json says $have. Use scripts/release.sh."; exit 1; }
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
@@ -39,7 +39,7 @@ jobs:
       - name: Zip the app
         run: ditto -c -k --keepParent src-tauri/target/release/bundle/macos/FocusMe.app FocusMe.zip
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: FocusMe.zip
           body: |
