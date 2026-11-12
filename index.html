@@ -295,18 +295,47 @@ section{scroll-margin-top:84px;position:relative}
 .caret::after{content:"▋";animation:blinkc 1s steps(1) infinite;color:var(--blue)}
 @keyframes blinkc{50%{opacity:0}}
 
-/* FAQ */
-.faq{max-width:680px;margin-inline:auto;display:flex;flex-direction:column;gap:.8rem;
+/* help center + FAQ */
+.help{display:grid;grid-template-columns:230px 1fr;gap:1.2rem;align-items:start;
   padding-block:clamp(1.8rem,4vw,2.6rem) clamp(2.6rem,7vw,4rem)}
+.help-nav{display:flex;flex-direction:column;gap:.5rem;position:sticky;top:84px}
+.help-nav button{font-family:var(--display);font-weight:600;font-size:1rem;text-align:left;
+  cursor:pointer;border:2.5px solid var(--edge);border-radius:14px;padding:.6em .8em;
+  background:var(--card);color:var(--ink);box-shadow:3px 3px 0 var(--shadow);transition:transform .1s ease}
+.help-nav button:hover{transform:translateX(3px)}
+.help-nav button.on{background:var(--blue);color:#fff}
+.help-panel{min-width:0}
+.art{display:none}
+.art.on{display:block;animation:artin .3s ease}
+@keyframes artin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.artcard{padding:1.4rem}
+.art h3{font-size:1.5rem;margin:0 0 .2rem}
+.art .art-sub{color:var(--muted);margin-bottom:1rem}
+.art h4{font-family:var(--display);font-size:1.1rem;margin:1.1rem 0 .3rem}
+.art p{color:var(--muted);margin:.45rem 0}
+.art ol,.art ul{color:var(--muted);margin:.45rem 0;padding-left:1.2rem;display:flex;flex-direction:column;gap:.4rem}
+.art code{font-family:var(--mono);font-size:.86em;background:var(--band);
+  border:1.5px solid var(--edge);border-radius:7px;padding:.05em .4em}
+.tscroll{overflow-x:auto}
+.cmd-table{width:100%;border-collapse:collapse;margin:.5rem 0;font-size:.92rem}
+.cmd-table td{border:2px solid var(--edge);padding:.4em .6em;vertical-align:top;color:var(--muted)}
+.cmd-table td:first-child{font-family:var(--mono);font-weight:700;white-space:nowrap;
+  background:var(--band);color:var(--ink)}
+.faq{display:flex;flex-direction:column;gap:.7rem}
 .qa{padding:0;overflow:hidden}
-.qa summary{list-style:none;cursor:pointer;padding:1rem 1.2rem;font-family:var(--display);
-  font-weight:600;font-size:1.08rem;display:flex;align-items:center;gap:.7rem}
+.qa summary{list-style:none;cursor:pointer;padding:.9rem 1.1rem;font-family:var(--display);
+  font-weight:600;font-size:1.02rem;display:flex;align-items:center;gap:.7rem}
 .qa summary::-webkit-details-marker{display:none}
 .qa summary .plus{margin-left:auto;font-size:1.4rem;line-height:1;transition:transform .25s ease;color:var(--blue)}
 .qa[open] summary .plus{transform:rotate(45deg)}
-.qa .ans{padding:0 1.2rem 1.1rem;color:var(--muted);font-size:.98rem}
+.qa .ans{padding:0 1.1rem 1rem;color:var(--muted);font-size:.96rem}
 .qa .ans code{font-family:var(--mono);font-size:.86em;background:var(--band);
   border:1.5px solid var(--edge);border-radius:7px;padding:.05em .4em}
+@media(max-width:720px){
+  .help{grid-template-columns:1fr}
+  .help-nav{flex-direction:row;overflow-x:auto;position:static;padding-bottom:.4rem}
+  .help-nav button{white-space:nowrap;flex:none}
+}
 
 /* big CTA */
 .final{overflow:hidden}
@@ -355,7 +384,7 @@ footer .ft-sp{flex:1}
     <span class="nav-sp"></span>
     <a class="ghostlink hideSm" href="#features">Features</a>
     <a class="ghostlink hideSm" href="#make-it-yours">Customize</a>
-    <a class="ghostlink hideSm" href="#faq">FAQ</a>
+    <a class="ghostlink hideSm" href="#help">Help</a>
     <button class="themeBtn" id="themeBtn" title="Switch theme" aria-label="Switch theme">◐</button>
     <a class="btn blue" href="https://github.com/ShyamGanesh13/focusme/releases/latest" target="_blank" rel="noopener" style="padding:.5em .9em;font-size:.95rem">Get it</a>
   </div>
@@ -504,26 +533,151 @@ footer .ft-sp{flex:1}
   </div>
 </section>
 
-<!-- ============================ FAQ ============================ -->
-<section id="faq">
+<!-- ============================ HELP CENTER ============================ -->
+<section id="help">
   <div class="wrap">
     <div class="sec-head reveal">
-      <div class="kicker">Good questions</div>
-      <h2>Before you download.</h2>
+      <div class="kicker">Help center</div>
+      <h2>How to use FocusMe.</h2>
+      <p>From your first launch to swapping Pip for your own artwork.</p>
     </div>
-    <div class="faq">
-      <details class="qa sticker reveal"><summary>Is it safe to install?<span class="plus">+</span></summary>
-        <div class="ans">Yes. FocusMe is open source — you can read every line on GitHub. There's no account and nothing you do leaves your Mac. It just isn't code-signed with a paid Apple certificate yet, so macOS asks you to confirm the very first launch (<b>right-click → Open</b>). After that it opens normally.</div></details>
-      <details class="qa sticker reveal"><summary>Which Macs does it run on?<span class="plus">+</span></summary>
-        <div class="ans">Apple Silicon Macs (M1 and newer) on macOS 11 or later.</div></details>
-      <details class="qa sticker reveal"><summary>Is it really free?<span class="plus">+</span></summary>
-        <div class="ans">Completely. Free and open source, no trial, no upsell, no ads.</div></details>
-      <details class="qa sticker reveal"><summary>Does it phone home or use AI?<span class="plus">+</span></summary>
-        <div class="ans">No cloud and no LLM — the chat answers run entirely on your machine. The only network call is a once-a-day check to GitHub to see if a newer version is out (and weather, if you ask for it).</div></details>
-      <details class="qa sticker reveal"><summary>How do updates work?<span class="plus">+</span></summary>
-        <div class="ans">When a new release is out, Pip shows an "Update" bubble with a download button. Grab the new <code>FocusMe.zip</code> and drop it in — you're current.</div></details>
-      <details class="qa sticker reveal"><summary>How do I remove it?<span class="plus">+</span></summary>
-        <div class="ans">Quit it from the menu-bar icon, then drag <code>FocusMe.app</code> to the Trash. Nothing lingers.</div></details>
+    <div class="help reveal">
+      <nav class="help-nav" id="helpNav" aria-label="Help topics">
+        <button class="on" data-go="start">🚀 Getting started</button>
+        <button data-go="chat">💬 Talking to Pip</button>
+        <button data-go="remind">⏰ Reminders &amp; routines</button>
+        <button data-go="focus">⏳ Focus sessions</button>
+        <button data-go="character">🎨 Change the character</button>
+        <button data-go="settings">⚙️ Customize &amp; peek</button>
+        <button data-go="trouble">🛟 Troubleshooting</button>
+        <button data-go="faq">❓ Common questions</button>
+      </nav>
+      <div class="help-panel">
+
+        <article class="art artcard sticker on" data-art="start">
+          <h3>Getting started</h3>
+          <p class="art-sub">From download to a pet on your Dock in about 30 seconds.</p>
+          <ol>
+            <li>Download <code>FocusMe.zip</code> and unzip it into Applications.</li>
+            <li><b>Right-click the app → Open → Open.</b> It's unsigned, so a normal double-click is blocked the first time; right-clicking confirms it once. If macOS says it's "damaged", run <code>xattr -dr com.apple.quarantine /Applications/FocusMe.app</code> in Terminal.</li>
+            <li>Pip appears near your Dock and an icon lands in the menu bar — your home base for Settings, show/hide, and quit.</li>
+          </ol>
+          <h4>Meet Pip</h4>
+          <ul>
+            <li><b>Triple-tap</b> Pip to open the chat.</li>
+            <li><b>One tap</b> is a quick hello, <b>drag</b> to move it, <b>right-click</b> for a menu.</li>
+            <li>By default Pip is in <b>peek mode</b> — it stays tucked away and only slides up when it has a nudge for you.</li>
+          </ul>
+        </article>
+
+        <article class="art artcard sticker" data-art="chat">
+          <h3>Talking to Pip</h3>
+          <p class="art-sub">Triple-tap to open the chat, then type. Commands start with <code>/</code>, questions end with <code>?</code>.</p>
+          <h4>Commands</h4>
+          <div class="tscroll"><table class="cmd-table"><tbody>
+            <tr><td>/timer 25</td><td>Start a focus session (minutes)</td></tr>
+            <tr><td>/stop</td><td>End the focus session</td></tr>
+            <tr><td>/remind call Kavi at 5pm</td><td>Remind me once</td></tr>
+            <tr><td>/daily 11:30 chia seeds</td><td>Remind me at the same time every day</td></tr>
+            <tr><td>/every 2h stand and stretch</td><td>Repeat on an interval</td></tr>
+            <tr><td>/water 30</td><td>Water nudge every N min (<code>/water off</code> to stop)</td></tr>
+            <tr><td>/note buy milk</td><td>Save a note</td></tr>
+            <tr><td>/sleep · /hide · /quit</td><td>Nap · hide the pet · quit</td></tr>
+            <tr><td>/settings · /help</td><td>Open Settings · list everything</td></tr>
+          </tbody></table></div>
+          <h4>Questions</h4>
+          <p>End any of these with <code>?</code> and Pip answers instantly, all from your own Mac:</p>
+          <p><code>battery?</code> <code>memory?</code> <code>cpu?</code> <code>disk?</code> <code>weather?</code> <code>weather in Tokyo?</code> <code>internet?</code> <code>uptime?</code> <code>time?</code> <code>timer?</code> <code>reminders?</code> <code>notes?</code></p>
+          <p>Anything that isn't a command or a question is saved as a quick note.</p>
+        </article>
+
+        <article class="art artcard sticker" data-art="remind">
+          <h3>Reminders &amp; routines</h3>
+          <p class="art-sub">Three flavours — set them by chat, or in <b>Settings → Reminders</b>.</p>
+          <h4>One-off reminder</h4>
+          <p>In chat: <code>/remind submit report at 4pm</code> or <code>/remind stretch in 20 min</code>. Or add one in Settings with a date &amp; time.</p>
+          <h4>Daily reminder</h4>
+          <p>Same time every day: <code>/daily 9am vitamins</code> or <code>/daily 11:30 chia seeds</code>.</p>
+          <h4>Routine (every N)</h4>
+          <p>Repeat on an interval: <code>/every 2h stand and stretch</code>. You can give a routine an active window (e.g. only 9–6) in Settings.</p>
+          <h4>Water &amp; bedtime</h4>
+          <p>Turn on sip reminders with <code>/water 45</code> (or <b>Settings → Wellbeing</b>), and set a bedtime wind-down window there too. Both pause automatically during a focus session.</p>
+        </article>
+
+        <article class="art artcard sticker" data-art="focus">
+          <h3>Focus sessions</h3>
+          <p class="art-sub">A Pomodoro-style timer that keeps running even while Pip is hidden.</p>
+          <ul>
+            <li>Start one with <code>/timer 25</code>, the menu-bar <b>Start focus session</b>, or Settings.</li>
+            <li>A countdown ring shows the time left — <b>click it</b> to pause, resume, or end.</li>
+            <li>When it finishes, Pip gives a gentle chime and suggests a break.</li>
+            <li>Set your default length and the chime in <b>Settings → Focus</b>.</li>
+          </ul>
+        </article>
+
+        <article class="art artcard sticker" data-art="character">
+          <h3>Change the character</h3>
+          <p class="art-sub">Pip is just the default — drop in any SVG or image and it becomes your pet.</p>
+          <ol>
+            <li>Open <b>Settings → Character</b> and choose a file (an SVG, or a PNG/JPG that gets traced into one).</li>
+            <li>That's it — the whole drawing breathes, walks, and reacts. Hit <b>Reset</b> any time to bring Pip back.</li>
+          </ol>
+          <h4>Make parts move</h4>
+          <p>Give groups in your SVG these ids (or <code>data-part="…"</code>) and FocusMe animates them for you:</p>
+          <div class="tscroll"><table class="cmd-table"><tbody>
+            <tr><td>eyes / eye-left / eye-right</td><td>blink and squint</td></tr>
+            <tr><td>pupils (class="pupil")</td><td>follow the mouse</td></tr>
+            <tr><td>mouth</td><td>moves while talking</td></tr>
+            <tr><td>arm-left / arm-right</td><td>swing while walking, wave hello</td></tr>
+            <tr><td>antenna / tail / ears</td><td>lazy sway</td></tr>
+            <tr><td>face / head</td><td>tilt</td></tr>
+          </tbody></table></div>
+          <p>No named parts? No problem — it just moves as one happy blob.</p>
+        </article>
+
+        <article class="art artcard sticker" data-art="settings">
+          <h3>Customize &amp; peek mode</h3>
+          <p class="art-sub"><b>Settings → Pet</b> has all the knobs.</p>
+          <ul>
+            <li><b>Name</b> — what Pip calls you.</li>
+            <li><b>Size &amp; speed</b> — scale it up or down, set how briskly it moves.</li>
+            <li><b>Wander</b> — little strolls along the Dock when idle.</li>
+            <li><b>Sleepy</b> — dozes off when left alone.</li>
+            <li><b>Eyes follow cursor</b> — Pip watches your pointer.</li>
+            <li><b>Peek mode</b> — stays hidden off-screen and only pops up for a nudge. Turn it off to keep Pip on screen all the time.</li>
+          </ul>
+          <p><b>Open at login</b> and multi-monitor support (a pet on every screen) are on by default — find them in <b>Settings → General</b>.</p>
+        </article>
+
+        <article class="art artcard sticker" data-art="trouble">
+          <h3>Troubleshooting</h3>
+          <h4>"FocusMe is damaged / can't be opened"</h4>
+          <p>It's just unsigned. Right-click the app → <b>Open</b>. If that still refuses, run once in Terminal: <code>xattr -dr com.apple.quarantine /Applications/FocusMe.app</code></p>
+          <h4>I can't see the pet</h4>
+          <p>It's probably in peek mode (hidden until a nudge). Click the menu-bar icon → <b>Show / hide pet</b>, or turn off peek in <b>Settings → Pet</b>.</p>
+          <h4>Reminders didn't fire after a restart</h4>
+          <p>Interval routines count from when the app starts, so they reset on a restart — expected for an always-on app. One-off and daily reminders are unaffected.</p>
+          <h4>Updating</h4>
+          <p>Pip shows an "Update" bubble when a new version is out — download the new <code>FocusMe.zip</code> and replace the app.</p>
+        </article>
+
+        <article class="art artcard sticker" data-art="faq">
+          <h3>Common questions</h3>
+          <div class="faq">
+            <details class="qa"><summary>Is it safe to install?<span class="plus">+</span></summary>
+              <div class="ans">Yes. FocusMe is open source — you can read every line on GitHub. There's no account and nothing you do leaves your Mac. It just isn't code-signed with a paid Apple certificate yet, so macOS asks you to confirm the first launch (<b>right-click → Open</b>). After that it opens normally.</div></details>
+            <details class="qa"><summary>Which Macs does it run on?<span class="plus">+</span></summary>
+              <div class="ans">Apple Silicon Macs (M1 and newer) on macOS 11 or later.</div></details>
+            <details class="qa"><summary>Is it really free?<span class="plus">+</span></summary>
+              <div class="ans">Completely. Free and open source, no trial, no upsell, no ads.</div></details>
+            <details class="qa"><summary>Does it phone home or use AI?<span class="plus">+</span></summary>
+              <div class="ans">No cloud and no LLM — the chat answers run entirely on your machine. The only network call is a once-a-day check to GitHub for updates (and weather, if you ask for it).</div></details>
+            <details class="qa"><summary>How do I remove it?<span class="plus">+</span></summary>
+              <div class="ans">Quit it from the menu-bar icon, then drag <code>FocusMe.app</code> to the Trash. Nothing lingers.</div></details>
+          </div>
+        </article>
+
+      </div>
     </div>
   </div>
 </section>
@@ -676,6 +830,13 @@ footer .ft-sp{flex:1}
 
   /* toggle demo */
   document.querySelectorAll("[data-tgl]").forEach(function(t){ t.addEventListener("click",function(){ t.classList.toggle("on"); }); });
+
+  /* help center tabs */
+  var hn=document.getElementById("helpNav");
+  if(hn){ hn.addEventListener("click",function(e){ var b=e.target.closest("button[data-go]"); if(!b) return;
+    hn.querySelectorAll("button").forEach(function(x){ x.classList.toggle("on",x===b); });
+    document.querySelectorAll(".art").forEach(function(a){ a.classList.toggle("on",a.dataset.art===b.dataset.go); });
+  }); }
 
   /* chat typing */
   var typed=document.getElementById("typed");
