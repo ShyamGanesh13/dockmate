@@ -9,7 +9,7 @@ use serde_json::json;
 use std::time::Duration;
 use tauri::{AppHandle, Emitter};
 
-pub const RELEASES: &str = "https://github.com/ShyamGanesh13/focusme/releases";
+pub const RELEASES: &str = "https://github.com/ShyamGanesh13/dockmate/releases";
 
 pub fn start(app: AppHandle) {
     std::thread::spawn(move || {
@@ -19,7 +19,7 @@ pub fn start(app: AppHandle) {
         loop {
             if let Some(latest) = latest_version() {
                 if newer(&latest, &current) && latest != told {
-                    eprintln!("[focusme/update] {latest} is out (running {current})");
+                    eprintln!("[dockmate/update] {latest} is out (running {current})");
                     let url = format!("{RELEASES}/tag/v{latest}");
                     let _ = app.emit("update-available", json!({ "version": latest, "url": url }));
                     told = latest;

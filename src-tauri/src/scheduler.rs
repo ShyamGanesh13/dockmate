@@ -41,14 +41,14 @@ pub fn start(app: AppHandle) {
             let state = app.state::<AppState>();
             let c = state.config.lock().unwrap();
             eprintln!(
-                "[focusme/sched] started — water enabled={} every={}min, bedtime={}, reminders={}, routines={}",
+                "[dockmate/sched] started — water enabled={} every={}min, bedtime={}, reminders={}, routines={}",
                 c.water.enabled,
                 c.water.every_minutes,
                 c.bedtime.enabled,
                 c.reminders.iter().filter(|r| !r.done).count(),
                 c.routines.iter().filter(|r| r.enabled).count()
             );
-            eprintln!("[focusme/sched] daily reminders={}", c.daily.iter().filter(|d| d.enabled).count());
+            eprintln!("[dockmate/sched] daily reminders={}", c.daily.iter().filter(|d| d.enabled).count());
         }
         loop {
             std::thread::sleep(std::time::Duration::from_secs(1));
@@ -123,7 +123,7 @@ fn beat(app: &AppHandle) {
         }
     }
     for r in fired {
-        eprintln!("[focusme/reminder] firing: {} ({})", r.text, r.at);
+        eprintln!("[dockmate/reminder] firing: {} ({})", r.text, r.at);
         notify("Reminder", &r.text);
         let _ = app.emit("reminder", r);
     }
@@ -134,18 +134,18 @@ fn beat(app: &AppHandle) {
         let elapsed = (now - rt.last_water).num_seconds();
         let target = (cfg.water.every_minutes.max(1) as i64) * 60;
         if elapsed % 30 == 0 {
-            eprintln!("[focusme/water] on — {elapsed}s of {target}s");
+            eprintln!("[dockmate/water] on — {elapsed}s of {target}s");
         }
         if elapsed >= target {
             rt.last_water = now;
             drop(rt);
-            eprintln!("[focusme/water] firing water nudge");
+            eprintln!("[dockmate/water] firing water nudge");
             notify("Dockmate", "Time for a sip of water.");
             let _ = app.emit("water", ());
         }
     } else if cfg.water.enabled && now.timestamp() % 30 == 0 {
         let why = if left.is_some() { "focus session running" } else if bedtime { "bedtime window" } else { "?" };
-        eprintln!("[focusme/water] paused ({why})");
+        eprintln!("[dockmate/water] paused ({why})");
     }
 
     // recurring routines — "stand & stretch every 2h". They run independently
@@ -171,7 +171,7 @@ fn beat(app: &AppHandle) {
             rt.routine_last.retain(|id, _| live.contains(id));
         }
         for r in fired_routines {
-            eprintln!("[focusme/routine] firing: {} (every {}min)", r.label, r.every_minutes);
+            eprintln!("[dockmate/routine] firing: {} (every {}min)", r.label, r.every_minutes);
             // Bubble only — no system banner for routines (kept for water/reminders/session).
             let _ = app.emit("routine", r);
         }
@@ -194,7 +194,7 @@ fn beat(app: &AppHandle) {
             rt.daily_fired.retain(|id, _| live.contains(id));
         }
         for d in fired {
-            eprintln!("[focusme/daily] firing: {} at {}", d.label, d.time);
+            eprintln!("[dockmate/daily] firing: {} at {}", d.label, d.time);
             notify("Reminder", &d.label);
             let _ = app.emit("reminder", DailyFire { text: d.label });
         }

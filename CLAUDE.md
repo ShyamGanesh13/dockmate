@@ -81,7 +81,7 @@ to update it. Unsigned, so first launch may need right-click → Open.
 - Working, committed: full-screen overlay, multi-monitor (verified on 2 displays), peek
   mode, focus sessions + pause/snooze, one-off + daily + routine reminders, water, bedtime,
   chat with inline action buttons, clear-chat, login item, `install-mac.sh`.
-- Remote is `github.com/ShyamGanesh13/focusme` (branch `main`). Push with a PAT.
+- Remote is `github.com/ShyamGanesh13/dockmate` (branch `main`). Push with a PAT.
 - **Releases:** `./scripts/release.sh X.Y.Z` bumps `tauri.conf.json`/`package.json`, tags
   `vX.Y.Z`, pushes; `.github/workflows/release.yml` (macos-14, Apple Silicon) builds and
   attaches `Dockmate.zip`. `update.rs` checks `/releases/latest`'s redirect once a day (not

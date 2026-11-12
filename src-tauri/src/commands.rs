@@ -49,7 +49,7 @@ pub fn set_hitbox(window: tauri::WebviewWindow, state: State<AppState>, rects: V
 /// window is actually running pet.js and what size it sees.
 #[tauri::command]
 pub fn pet_ready(window: tauri::WebviewWindow, w: f64, h: f64) {
-    eprintln!("[focusme/pet] {} ready — inner {}x{}", window.label(), w as i64, h as i64);
+    eprintln!("[dockmate/pet] {} ready — inner {}x{}", window.label(), w as i64, h as i64);
 }
 
 /// Give the pet window the user is on real keyboard focus so its chat box can
@@ -367,7 +367,7 @@ fn run_command(app: &AppHandle, state: &AppState, cmd: Command) -> Answer {
                 state.save_config(&cfg);
                 cfg.water.every_minutes
             };
-            eprintln!("[focusme/water] command: on={on} minutes={minutes:?} -> every {every} min");
+            eprintln!("[dockmate/water] command: on={on} minutes={minutes:?} -> every {every} min");
             // Count the interval from now, so the first nudge isn't immediate.
             state.rt.lock().unwrap().last_water = Local::now();
             let _ = app.emit("config-changed", state.config.lock().unwrap().clone());

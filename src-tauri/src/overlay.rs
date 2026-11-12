@@ -105,7 +105,7 @@ pub fn reconcile_pets(app: &AppHandle) {
                     pin_above_everything(&w);
                 }
                 if first {
-                    eprintln!("[focusme/overlay] {label}: target monitor pos={:?} size={:?} -> window at {:?} size {:?}",
+                    eprintln!("[dockmate/overlay] {label}: target monitor pos={:?} size={:?} -> window at {:?} size {:?}",
                         m.position(), m.size(), w.outer_position().ok(), w.outer_size().ok());
                 }
             }
@@ -133,10 +133,10 @@ pub fn reconcile_pets(app: &AppHandle) {
                             let _ = w.show();
                             pin_above_everything(&w);
                         }
-                        eprintln!("[focusme/overlay] created {label}: target pos={:?} -> window at {:?} size {:?}",
+                        eprintln!("[dockmate/overlay] created {label}: target pos={:?} -> window at {:?} size {:?}",
                             m.position(), w.outer_position().ok(), w.outer_size().ok());
                     }
-                    Err(e) => eprintln!("[focusme/overlay] could not create {label}: {e}"),
+                    Err(e) => eprintln!("[dockmate/overlay] could not create {label}: {e}"),
                 }
             }
         }
@@ -157,7 +157,7 @@ pub fn reconcile_pets(app: &AppHandle) {
     // Log the summary only when the overlay count changes (not every 2s).
     static LAST: AtomicUsize = AtomicUsize::new(usize::MAX);
     if LAST.swap(n, Ordering::Relaxed) != n {
-        eprintln!("[focusme/overlay] monitors={} active overlays={n} (total {})", mons.len(), pet_windows(app).len());
+        eprintln!("[dockmate/overlay] monitors={} active overlays={n} (total {})", mons.len(), pet_windows(app).len());
     }
 }
 
@@ -230,7 +230,7 @@ pub fn pin_above_everything(win: &WebviewWindow) {
             let beh: usize = msg_send![ns, collectionBehavior];
             let is_panel: bool = panel_class().map(|pc| msg_send![ns, isKindOfClass: pc]).unwrap_or(false);
             let can_key: bool = msg_send![ns, canBecomeKeyWindow];
-            eprintln!("[focusme/overlay] applied level={lvl} behavior={beh} panel={is_panel} canKey={can_key}");
+            eprintln!("[dockmate/overlay] applied level={lvl} behavior={beh} panel={is_panel} canKey={can_key}");
         }
     }
 }

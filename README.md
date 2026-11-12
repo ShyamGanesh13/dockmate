@@ -18,7 +18,7 @@ and everything stays on your Mac.
 
 ## Download (no build needed)
 
-Grab **Dockmate.zip** from the [latest release](https://github.com/ShyamGanesh13/focusme/releases/latest)
+Grab **Dockmate.zip** from the [latest release](https://github.com/ShyamGanesh13/dockmate/releases/latest)
 (Apple Silicon Macs), unzip, drag **Dockmate.app** into Applications. The release page
 has the one-time "Open Anyway" step for unsigned apps. Once installed, Dockmate checks
 for a new release once a day and Pip offers a **Download** button when one is out.

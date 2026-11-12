@@ -6,7 +6,7 @@
 #
 # Bumps the version, commits, tags v0.2.0 and pushes. GitHub Actions
 # (.github/workflows/release.yml) then builds the app and puts Dockmate.zip on
-# https://github.com/ShyamGanesh13/focusme/releases/latest (~5–10 min).
+# https://github.com/ShyamGanesh13/dockmate/releases/latest (~5–10 min).
 # Installed copies notice the new version within a day and show an Update bubble.
 #
 set -euo pipefail
@@ -29,5 +29,5 @@ git tag "v$V"
 git push -q origin HEAD "v$V"
 
 echo "✓ Pushed v$V. GitHub is building it now:"
-echo "  https://github.com/ShyamGanesh13/focusme/actions"
-echo "  Friends download from: https://github.com/ShyamGanesh13/focusme/releases/latest"
+echo "  https://github.com/ShyamGanesh13/dockmate/actions"
+echo "  Friends download from: https://github.com/ShyamGanesh13/dockmate/releases/latest"
