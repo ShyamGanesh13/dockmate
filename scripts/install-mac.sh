@@ -34,7 +34,7 @@ osascript -e 'quit app "FocusMe"' >/dev/null 2>&1 || true
 pkill -f "FocusMe.app/Contents/MacOS/deskpal" >/dev/null 2>&1 || true
 sleep 1
 
-echo "▶ Installing to $DEST…"
+echo "▶ Installing to ${DEST}…"
 mkdir -p "$DIR"
 rm -rf "$DEST"
 cp -R "$BUNDLE" "$DEST"
