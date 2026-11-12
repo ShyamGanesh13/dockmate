@@ -1,0 +1,708 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>FocusMe</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Figtree:wght@400;500;600;700;900&family=JetBrains+Mono:wght@500;700&display=swap">
+
+<style>
+/* ---------------------------------------------------------------------------
+   FocusMe — sticker / neo-brutalist landing page.
+   Layout: full-width colored bands + a 1120px inner column; chunky outlined
+   "sticker" cards with hard offset shadows. Motion: an ambient blob field,
+   a live faux-desktop where Pip bobs/blinks/follows/waves, cursor parallax,
+   an animated focus ring, hover micro-interactions and staggered reveals.
+--------------------------------------------------------------------------- */
+:root{
+  --paper:#ffece2;      /* warm peach-white (Candy Sunset) */
+  --band:#ffdccd;
+  --card:#fffaf6;
+  --ink:#2a1320;
+  --muted:rgba(42,19,32,.64);
+  --edge:#2a1320;
+  --blue:#2f86ff;       /* Pip (anchor) */
+  --pink:#ff2d8e;       /* magenta */
+  --yellow:#ffb020;     /* gold */
+  --lime:#ff6b5e;       /* coral */
+  --shadow:rgba(42,19,32,1);
+  color-scheme:light;
+
+  --display:"Fredoka","Trebuchet MS",sans-serif;
+  --body:"Figtree",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#1a0f1d;--band:#251534;--card:#2b1a32;--ink:#ffe9e2;
+    --muted:rgba(255,233,226,.62);--edge:#ffe3d8;
+    --blue:#5a9dff;--pink:#ff5aa6;--yellow:#ffc24d;--lime:#ff8a7a;
+    --shadow:rgba(0,0,0,.6);color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1a0f1d;--band:#251534;--card:#2b1a32;--ink:#ffe9e2;
+  --muted:rgba(255,233,226,.62);--edge:#ffe3d8;
+  --blue:#5a9dff;--pink:#ff5aa6;--yellow:#ffc24d;--lime:#ff8a7a;
+  --shadow:rgba(0,0,0,.6);color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+@media (prefers-reduced-motion: no-preference){ html{scroll-behavior:smooth} }
+body{background:var(--paper);color:var(--ink);font-family:var(--body);
+  font-weight:500;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{font-family:var(--display);font-weight:700;line-height:1.02;
+  letter-spacing:-.01em;text-wrap:balance;margin:0}
+p{margin:0}
+a{color:inherit}
+section{scroll-margin-top:84px;position:relative}
+
+.wrap{max-width:1120px;margin-inline:auto;
+  padding-left:max(20px,env(safe-area-inset-left,0px));
+  padding-right:max(20px,env(safe-area-inset-right,0px));}
+
+/* ---------- sticker bits ---------- */
+.sticker{border:3px solid var(--edge);border-radius:22px;background:var(--card);
+  box-shadow:6px 6px 0 var(--shadow)}
+.tag{display:inline-flex;align-items:center;gap:.4em;border:2.5px solid var(--edge);
+  border-radius:999px;padding:.34em .8em;font-weight:700;font-size:.82rem;
+  background:var(--card);box-shadow:3px 3px 0 var(--shadow);white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;
+  font-family:var(--display);font-weight:600;font-size:1.05rem;cursor:pointer;
+  border:3px solid var(--edge);border-radius:16px;padding:.72em 1.2em;
+  background:var(--yellow);color:#15141b;box-shadow:5px 5px 0 var(--shadow);
+  text-decoration:none;transition:transform .12s ease,box-shadow .12s ease}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--shadow)}
+.btn:active{transform:translate(3px,3px);box-shadow:2px 2px 0 var(--shadow)}
+.btn.blue{background:var(--blue);color:#fff}
+.btn.ghost{background:var(--card);color:var(--ink)}
+.btn .dl{display:inline-block}
+@media (prefers-reduced-motion: no-preference){ .btn:hover .dl{animation:dlbounce .6s ease} }
+@keyframes dlbounce{0%,100%{transform:translateY(0)}40%{transform:translateY(3px)}}
+:focus-visible{outline:3px solid var(--pink);outline-offset:3px}
+
+/* scroll progress */
+.progress{position:fixed;top:env(safe-area-inset-top,0px);left:0;height:4px;width:0;
+  background:linear-gradient(90deg,var(--blue),var(--pink),var(--yellow));z-index:60}
+
+/* ---------- nav ---------- */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;
+  background:color-mix(in srgb,var(--paper) 86%,transparent);
+  backdrop-filter:blur(8px);border-bottom:3px solid var(--edge)}
+.nav .wrap{display:flex;align-items:center;gap:1rem;padding-block:.7rem}
+.brand{display:flex;align-items:center;gap:.55rem;font-family:var(--display);
+  font-weight:700;font-size:1.3rem;letter-spacing:-.02em}
+.brand svg{width:34px;height:34px;flex:none}
+.nav-sp{flex:1}
+.nav .ghostlink{font-weight:700;text-decoration:none;font-size:.95rem;
+  padding:.4em .2em;border-bottom:3px solid transparent}
+.nav .ghostlink:hover{border-bottom-color:var(--pink)}
+.themeBtn{font-size:1.1rem;line-height:1;background:var(--card);
+  border:2.5px solid var(--edge);border-radius:12px;width:40px;height:40px;
+  cursor:pointer;box-shadow:3px 3px 0 var(--shadow);color:var(--ink);
+  transition:transform .4s ease}
+.themeBtn:hover{transform:rotate(180deg)}
+.themeBtn:active{transform:translate(2px,2px)}
+@media(max-width:640px){.nav .hideSm{display:none}}
+
+/* ---------- ambient blobs ---------- */
+.blobs{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.blob{position:absolute;border-radius:50%;filter:blur(42px);opacity:.5}
+.blob.b1{width:340px;height:340px;background:var(--blue);top:-80px;right:-40px}
+.blob.b2{width:300px;height:300px;background:var(--pink);bottom:-100px;left:-60px}
+.blob.b3{width:220px;height:220px;background:var(--yellow);top:40%;left:46%}
+@media (prefers-reduced-motion: no-preference){
+  .blob.b1{animation:drift1 16s ease-in-out infinite}
+  .blob.b2{animation:drift2 19s ease-in-out infinite}
+  .blob.b3{animation:drift3 13s ease-in-out infinite}
+}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,30px) scale(1.12)}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,-24px) scale(1.1)}}
+@keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-26px,-30px) scale(.9)}}
+
+/* ---------- hero ---------- */
+.hero{overflow:hidden}
+.hero .wrap{position:relative;z-index:1;display:grid;grid-template-columns:1.05fr .95fr;
+  gap:2.2rem;align-items:center;padding-block:clamp(2.2rem,6vw,4.5rem)}
+.eyebrow{display:inline-flex;gap:.5em;align-items:center;font-weight:800;
+  text-transform:uppercase;letter-spacing:.08em;font-size:.78rem;
+  color:var(--ink);background:var(--lime);border:2.5px solid var(--edge);
+  border-radius:999px;padding:.3em .8em;box-shadow:3px 3px 0 var(--shadow)}
+.hero h1{font-size:clamp(2.6rem,7vw,4.6rem)}
+.hero h1 .hl{color:var(--blue)}
+.hero h1 .hl2{color:var(--pink)}
+.hero .sub{font-size:clamp(1.05rem,2.4vw,1.28rem);color:var(--muted);
+  max-width:34ch;margin-top:1rem;font-weight:500}
+.cta-row{display:flex;flex-wrap:wrap;gap:.8rem;margin-top:1.6rem;align-items:center}
+.meta{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1.1rem}
+.hero-copy{min-width:0}
+
+/* desktop scene */
+.scene{position:relative;min-width:0;aspect-ratio:1/.92;
+  border:3px solid var(--edge);border-radius:26px;box-shadow:8px 8px 0 var(--shadow);
+  background:
+    radial-gradient(120% 90% at 78% 8%, color-mix(in srgb,var(--blue) 26%,transparent), transparent 60%),
+    radial-gradient(110% 80% at 12% 94%, color-mix(in srgb,var(--pink) 24%,transparent), transparent 55%),
+    linear-gradient(180deg, color-mix(in srgb,var(--blue) 12%,var(--card)), var(--card));
+  overflow:hidden}
+.scene .dots{position:absolute;inset:0;opacity:.5;
+  background-image:radial-gradient(currentColor 1.4px,transparent 1.5px);
+  background-size:20px 20px;color:color-mix(in srgb,var(--edge) 22%,transparent)}
+.menubar{position:absolute;top:0;left:0;right:0;height:26px;display:flex;
+  align-items:center;gap:6px;padding:0 10px;border-bottom:2.5px solid var(--edge);
+  background:color-mix(in srgb,var(--card) 70%,transparent);font-size:11px;font-weight:700}
+.menubar .m-sp{flex:1}
+.menubar .pipdot{width:15px;height:15px}
+.dock{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);
+  display:flex;gap:7px;padding:7px 9px;border:2.5px solid var(--edge);border-radius:16px;
+  background:color-mix(in srgb,var(--card) 78%,transparent);box-shadow:3px 3px 0 var(--shadow)}
+.dock i{width:26px;height:26px;border-radius:8px;border:2px solid var(--edge);display:block;
+  transition:transform .15s ease}
+.dock:hover i:hover{transform:translateY(-6px) scale(1.12)}
+
+.layer{will-change:transform}
+.pip-stage{position:absolute;right:7%;bottom:34px;width:38%;max-width:220px;
+  cursor:grab;touch-action:none}
+.pip-stage:active{cursor:grabbing}
+.pip{width:100%;height:auto;display:block;transform-origin:50% 100%;
+  filter:drop-shadow(3px 5px 0 color-mix(in srgb,var(--edge) 35%,transparent))}
+
+/* speech bubble */
+.bubble{position:absolute;bottom:88%;right:4%;max-width:200px;
+  background:var(--card);border:3px solid var(--edge);border-radius:16px;
+  padding:.6em .8em;font-weight:700;font-size:.92rem;box-shadow:5px 5px 0 var(--shadow);
+  transition:opacity .35s ease,transform .35s ease}
+.bubble small{display:block;font-weight:600;font-size:.72rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:.15em}
+.bubble::after{content:"";position:absolute;bottom:-13px;right:30px;width:16px;height:16px;
+  background:var(--card);border-right:3px solid var(--edge);border-bottom:3px solid var(--edge);
+  transform:rotate(35deg)}
+.bubble.hide{opacity:0;transform:translateY(6px) scale(.97)}
+
+/* focus ring badge */
+.badge{position:absolute;top:34px;left:16px;width:58px;height:58px;
+  display:grid;place-items:center}
+.badge svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.badge .ring-bg{fill:none;stroke:color-mix(in srgb,var(--edge) 20%,transparent);stroke-width:5}
+.badge .ring-fg{fill:none;stroke:var(--pink);stroke-width:5;stroke-linecap:round;
+  stroke-dasharray:138.2;stroke-dashoffset:34;transition:stroke-dashoffset 1s linear}
+.badge b{font-family:var(--mono);font-size:.72rem;font-weight:700;position:relative}
+
+/* ---------- marquee ---------- */
+.marquee{border-block:3px solid var(--edge);background:var(--blue);color:#fff;
+  overflow:hidden;white-space:nowrap}
+.marquee .track{display:inline-flex;gap:0;padding-block:.7rem;
+  font-family:var(--display);font-weight:600;font-size:1.05rem;
+  animation:scroll 22s linear infinite}
+.marquee .track:hover{animation-play-state:paused}
+.marquee .track span{display:inline-flex;gap:2.2rem;padding-right:2.2rem}
+.marquee b{color:var(--yellow)}
+@keyframes scroll{to{transform:translateX(-50%)}}
+
+/* ---------- section scaffold ---------- */
+.band{background:var(--band);border-block:3px solid var(--edge)}
+.sec-head{text-align:center;max-width:42ch;margin-inline:auto;
+  padding-block:clamp(2.4rem,6vw,3.6rem) 0}
+.sec-head .kicker{font-weight:800;text-transform:uppercase;letter-spacing:.1em;
+  font-size:.8rem;color:var(--pink)}
+.sec-head h2{font-size:clamp(2rem,5vw,3.1rem);margin-top:.5rem}
+.sec-head p{color:var(--muted);margin-top:.7rem;font-size:1.05rem}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;
+  padding-block:clamp(1.8rem,4vw,2.6rem) clamp(2.6rem,7vw,4rem)}
+.step{padding:1.4rem;position:relative;min-width:0;text-align:center}
+.step .n{width:46px;height:46px;border:3px solid var(--edge);border-radius:50%;
+  display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:1.3rem;
+  margin:0 auto .7rem;box-shadow:3px 3px 0 var(--shadow)}
+.step:nth-child(1) .n{background:var(--blue);color:#fff}
+.step:nth-child(2) .n{background:var(--pink);color:#fff}
+.step:nth-child(3) .n{background:var(--lime)}
+.step h3{font-size:1.2rem}
+.step p{color:var(--muted);font-size:.95rem;margin-top:.35rem}
+.step .emoji{font-size:1.7rem;display:block;margin-top:.6rem}
+@media (prefers-reduced-motion: no-preference){
+  .step:hover .emoji{animation:pop .5s ease}
+}
+@keyframes pop{0%,100%{transform:scale(1)}50%{transform:scale(1.35) rotate(-8deg)}}
+@media(max-width:720px){.steps{grid-template-columns:1fr}}
+
+/* feature grid */
+.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;
+  padding-block:clamp(1.8rem,4vw,2.6rem) clamp(2.6rem,7vw,4rem)}
+.feat{padding:1.3rem;display:flex;flex-direction:column;gap:.5rem;min-width:0;
+  transition:transform .15s ease,box-shadow .15s ease}
+.feat:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 var(--shadow)}
+.feat .ic{width:46px;height:46px;border:2.5px solid var(--edge);border-radius:13px;
+  display:grid;place-items:center;font-size:1.4rem;box-shadow:3px 3px 0 var(--shadow);
+  margin-bottom:.3rem}
+@media (prefers-reduced-motion: no-preference){
+  .feat:hover .ic{animation:wiggle .55s ease}
+}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}60%{transform:rotate(10deg)}}
+.feat h3{font-size:1.22rem}
+.feat p{color:var(--muted);font-size:.96rem}
+.feat.c0 .ic{background:var(--blue)}.feat.c1 .ic{background:var(--pink)}
+.feat.c2 .ic{background:var(--yellow)}.feat.c3 .ic{background:var(--lime)}
+.feat.c4 .ic{background:var(--pink)}.feat.c5 .ic{background:var(--blue)}
+@media(max-width:860px){.feats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:540px){.feats{grid-template-columns:1fr}}
+
+/* customize */
+.custom{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;
+  padding-block:clamp(1.8rem,4vw,2.6rem) clamp(2.6rem,7vw,4rem);align-items:stretch}
+.panel{padding:1.4rem}
+.panel h3{font-size:1.4rem}
+.panel .lead{color:var(--muted);margin-top:.4rem;font-size:.98rem}
+.slider-demo{display:flex;flex-direction:column;align-items:center;gap:.8rem;justify-content:center}
+.slider-demo .pipbox{height:190px;display:grid;place-items:end center;width:100%}
+.slider-demo .pip{width:auto;height:calc(74px + var(--pipscale,1) * 70px);transition:height .12s ease}
+.rng{width:100%;max-width:280px;accent-color:var(--blue);height:26px}
+.rng-lab{font-family:var(--mono);font-weight:700;font-size:.9rem;color:var(--muted)}
+.toggles{display:flex;flex-direction:column;gap:.7rem;margin-top:1rem}
+.tgl{display:flex;align-items:center;gap:.7rem;border:2.5px solid var(--edge);
+  border-radius:14px;padding:.6rem .8rem;background:var(--card);
+  box-shadow:3px 3px 0 var(--shadow);cursor:pointer;user-select:none;
+  transition:transform .12s ease}
+.tgl:hover{transform:translateX(3px)}
+.tgl .sw{width:44px;height:26px;border:2.5px solid var(--edge);border-radius:999px;
+  background:var(--card);position:relative;flex:none;transition:background .15s}
+.tgl .sw::after{content:"";position:absolute;top:1.5px;left:2px;width:17px;height:17px;
+  border:2px solid var(--edge);border-radius:50%;background:var(--card);
+  transition:left .18s cubic-bezier(.68,-0.55,.27,1.55)}
+.tgl.on .sw{background:var(--lime)}
+.tgl.on .sw::after{left:20px}
+.tgl .tx{font-weight:700;font-size:.95rem}
+.tgl .tx small{display:block;font-weight:500;color:var(--muted);font-size:.8rem}
+.upload-note{margin-top:.9rem;font-size:.88rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.9rem}
+.chip{font-family:var(--mono);font-weight:700;font-size:.8rem;border:2.5px solid var(--edge);
+  border-radius:10px;padding:.3em .55em;background:var(--card);box-shadow:2px 2px 0 var(--shadow)}
+@media(max-width:780px){.custom{grid-template-columns:1fr}}
+
+/* chat demo */
+.chatwrap{max-width:560px;margin-inline:auto;
+  padding-block:clamp(1.8rem,4vw,2.6rem) clamp(2.6rem,7vw,4rem)}
+.chat{padding:1rem 1rem 1.1rem}
+.chat .row{display:flex;margin:.45rem 0}
+.chat .q{margin-left:auto;background:var(--blue);color:#fff;border:2.5px solid var(--edge);
+  border-radius:15px 15px 4px 15px;padding:.5em .8em;max-width:78%;font-weight:600;
+  box-shadow:3px 3px 0 var(--shadow)}
+.chat .a{background:var(--card);border:2.5px solid var(--edge);border-radius:15px 15px 15px 4px;
+  padding:.5em .8em;max-width:82%;box-shadow:3px 3px 0 var(--shadow)}
+.chat .a b{display:block;font-family:var(--display)}
+.chat .a small{color:var(--muted);font-size:.85rem}
+.chat .cmd{font-family:var(--mono);font-weight:700}
+.caret::after{content:"▋";animation:blinkc 1s steps(1) infinite;color:var(--blue)}
+@keyframes blinkc{50%{opacity:0}}
+
+/* FAQ */
+.faq{max-width:680px;margin-inline:auto;display:flex;flex-direction:column;gap:.8rem;
+  padding-block:clamp(1.8rem,4vw,2.6rem) clamp(2.6rem,7vw,4rem)}
+.qa{padding:0;overflow:hidden}
+.qa summary{list-style:none;cursor:pointer;padding:1rem 1.2rem;font-family:var(--display);
+  font-weight:600;font-size:1.08rem;display:flex;align-items:center;gap:.7rem}
+.qa summary::-webkit-details-marker{display:none}
+.qa summary .plus{margin-left:auto;font-size:1.4rem;line-height:1;transition:transform .25s ease;color:var(--blue)}
+.qa[open] summary .plus{transform:rotate(45deg)}
+.qa .ans{padding:0 1.2rem 1.1rem;color:var(--muted);font-size:.98rem}
+.qa .ans code{font-family:var(--mono);font-size:.86em;background:var(--band);
+  border:1.5px solid var(--edge);border-radius:7px;padding:.05em .4em}
+
+/* big CTA */
+.final{overflow:hidden}
+.final .wrap{position:relative;z-index:1;text-align:center;padding-block:clamp(3rem,8vw,5rem)}
+.final h2{font-size:clamp(2.2rem,6vw,3.6rem)}
+.final .pipwave{width:120px;height:auto;margin-inline:auto;display:block}
+.final p{color:var(--muted);margin-top:.6rem;max-width:42ch;margin-inline:auto}
+
+/* footer */
+footer{border-top:3px solid var(--edge);background:var(--band)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:1rem 2rem;align-items:center;
+  padding-block:1.6rem;font-size:.92rem;color:var(--muted)}
+footer .brand{color:var(--ink)}
+footer a{font-weight:700;text-decoration:none;border-bottom:2px solid var(--pink)}
+footer .ft-sp{flex:1}
+
+/* pip ambient motion */
+@media (prefers-reduced-motion: no-preference){
+  .pip{animation:bob 3.2s ease-in-out infinite}
+  .pip #antenna{transform-origin:50% 100%;animation:sway 2.8s ease-in-out infinite}
+  .float{animation:floaty 5s ease-in-out infinite}
+}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+@keyframes sway{0%,100%{transform:rotate(-7deg)}50%{transform:rotate(8deg)}}
+@keyframes floaty{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-8px) rotate(1.5deg)}}
+.pip #eyes{transform-origin:50% 50%}
+.blinking #eyes{animation:blink .22s ease-in-out}
+@keyframes blink{50%{transform:scaleY(.08)}}
+.pip.waving #arm-right{animation:wave .7s ease-in-out;transform-origin:15% 15%}
+@keyframes wave{0%,100%{transform:rotate(0)}25%{transform:rotate(-55deg)}60%{transform:rotate(-30deg)}}
+
+.reveal{opacity:0;transform:translateY(18px)}
+.reveal.in{opacity:1;transform:none;transition:opacity .55s ease,transform .55s ease}
+@media (prefers-reduced-motion: reduce){.reveal{opacity:1;transform:none}}
+</style>
+
+<div class="progress" id="progress" aria-hidden="true"></div>
+
+<!-- ============================ NAV ============================ -->
+<nav class="nav">
+  <div class="wrap">
+    <span class="brand">
+      <svg viewBox="0 0 200 200" aria-hidden="true"><use href="#pip-mini"/></svg>
+      FocusMe
+    </span>
+    <span class="nav-sp"></span>
+    <a class="ghostlink hideSm" href="#features">Features</a>
+    <a class="ghostlink hideSm" href="#make-it-yours">Customize</a>
+    <a class="ghostlink hideSm" href="#faq">FAQ</a>
+    <button class="themeBtn" id="themeBtn" title="Switch theme" aria-label="Switch theme">◐</button>
+    <a class="btn blue" href="https://github.com/ShyamGanesh13/focusme/releases/latest" target="_blank" rel="noopener" style="padding:.5em .9em;font-size:.95rem">Get it</a>
+  </div>
+</nav>
+
+<!-- ============================ HERO ============================ -->
+<section class="hero">
+  <div class="blobs"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
+  <div class="wrap">
+    <div class="hero-copy">
+      <span class="eyebrow">✦ a little desk buddy for macOS</span>
+      <h1>Meet <span class="hl">Pip</span>.<br>Your tiny <span class="hl2">focus</span> gremlin.</h1>
+      <p class="sub">A desk pet that floats above everything, keeps your focus timers, and nudges you to drink water, stretch, and log off — without ever stealing the spotlight.</p>
+      <div class="cta-row">
+        <a class="btn" href="https://github.com/ShyamGanesh13/focusme/releases/latest" target="_blank" rel="noopener"><span class="dl">⬇</span> Download for macOS</a>
+        <a class="btn ghost" href="#features">See what it does</a>
+      </div>
+      <div class="meta">
+        <span class="tag">🍎 Apple Silicon</span>
+        <span class="tag">🆓 Free &amp; open source</span>
+        <span class="tag">🪶 Lives in your menu bar</span>
+      </div>
+    </div>
+
+    <!-- live desktop scene -->
+    <div class="scene" id="scene">
+      <div class="dots layer" data-depth="6"></div>
+      <div class="menubar layer" data-depth="10">
+        <svg class="pipdot" viewBox="0 0 200 200" aria-hidden="true"><use href="#pip-mini"/></svg>
+        <span>FocusMe</span><span class="m-sp"></span>
+        <b style="font-family:var(--mono)">9:41</b>
+      </div>
+      <div class="badge layer" data-depth="26">
+        <svg viewBox="0 0 52 52"><circle class="ring-bg" cx="26" cy="26" r="22"/><circle class="ring-fg" id="ring" cx="26" cy="26" r="22"/></svg>
+        <b id="badgeT">24:51</b>
+      </div>
+      <div class="bubble layer" id="bubble" data-depth="34"><small id="bub-tag">Pip says</small><span id="bub-text">Hey! Triple-tap me to chat 👋</span></div>
+      <div class="pip-stage layer" id="pipStage" data-depth="22" title="Pat me!">
+        <svg class="pip" id="pipHero" viewBox="0 0 200 206" aria-label="Pip the desk pet"><use href="#pip-full"/></svg>
+      </div>
+      <div class="dock layer" data-depth="14">
+        <i style="background:var(--blue)"></i><i style="background:var(--pink)"></i>
+        <i style="background:var(--yellow)"></i><i style="background:var(--lime)"></i>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ MARQUEE ============================ -->
+<div class="marquee" aria-hidden="true">
+  <div class="track">
+    <span>FOCUS SESSIONS <b>✦</b> WATER NUDGES <b>✦</b> DAILY REMINDERS <b>✦</b> STRETCH ROUTINES <b>✦</b> BEDTIME <b>✦</b> QUICK NOTES <b>✦</b> ASK IT ANYTHING <b>✦</b></span>
+    <span>FOCUS SESSIONS <b>✦</b> WATER NUDGES <b>✦</b> DAILY REMINDERS <b>✦</b> STRETCH ROUTINES <b>✦</b> BEDTIME <b>✦</b> QUICK NOTES <b>✦</b> ASK IT ANYTHING <b>✦</b></span>
+  </div>
+</div>
+
+<!-- ============================ STEPS ============================ -->
+<section id="start">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="kicker">Up and running</div>
+      <h2>Start in about 30 seconds.</h2>
+      <p>No account, no setup wizard. Download, open, done.</p>
+    </div>
+    <div class="steps">
+      <div class="step sticker reveal"><div class="n">1</div><h3>Download</h3><p>Grab <code style="font-family:var(--mono);font-size:.85em">FocusMe.zip</code> and unzip it into Applications.</p><span class="emoji">⬇️</span></div>
+      <div class="step sticker reveal"><div class="n">2</div><h3>Right-click → Open</h3><p>It's unsigned, so confirm the first launch once. macOS remembers after that.</p><span class="emoji">🔓</span></div>
+      <div class="step sticker reveal"><div class="n">3</div><h3>Say hi to Pip</h3><p>It lands in your menu bar and starts keeping watch. That's it.</p><span class="emoji">👋</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FEATURES ============================ -->
+<section id="features" class="band">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="kicker">The whole vibe</div>
+      <h2>Small pet. Big executive function.</h2>
+      <p>Rust keeps the clock, so every timer and nudge keeps running even while Pip is tucked away.</p>
+    </div>
+    <div class="feats">
+      <div class="feat sticker c0 reveal"><div class="ic">🖥️</div><h3>Floats over everything</h3><p>Sits above your Dock on every monitor — even over another app's full-screen Space — without stealing focus.</p></div>
+      <div class="feat sticker c1 reveal"><div class="ic">⏳</div><h3>Focus sessions</h3><p>Pomodoro-style timers with a live countdown ring, pause, snooze, and a gentle chime when time's up.</p></div>
+      <div class="feat sticker c2 reveal"><div class="ic">💧</div><h3>Water &amp; bedtime</h3><p>Sip reminders on your schedule, and a wind-down nudge when it's getting late. Both pause during deep focus.</p></div>
+      <div class="feat sticker c3 reveal"><div class="ic">🔁</div><h3>Reminders &amp; routines</h3><p>One-off reminders, the same time every day, or "every 2h stand and stretch." Natural language, no forms.</p></div>
+      <div class="feat sticker c4 reveal"><div class="ic">💬</div><h3>Ask it anything</h3><p>Battery, memory, CPU, disk, weather, uptime — type a question and Pip answers. No cloud, no LLM, instant.</p></div>
+      <div class="feat sticker c5 reveal"><div class="ic">📝</div><h3>Quick notes &amp; peek</h3><p>Jot a thought straight to Pip. In peek mode it rests off-screen and only slides up when it has something to say.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CUSTOMIZE ============================ -->
+<section id="make-it-yours">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="kicker">Make it yours</div>
+      <h2>Your pet, your rules.</h2>
+      <p>Resize it, slow it down, or swap Pip out for literally any drawing you want.</p>
+    </div>
+    <div class="custom">
+      <div class="panel sticker slider-demo reveal">
+        <div class="pipbox">
+          <svg class="pip" id="pipScale" viewBox="0 0 200 206" aria-label="Pip, resizable"><use href="#pip-full"/></svg>
+        </div>
+        <input class="rng" id="scaleRng" type="range" min="0.5" max="2" step="0.05" value="1" aria-label="Pet size">
+        <div class="rng-lab" id="scaleLab">drag me · 140px tall</div>
+      </div>
+      <div class="panel sticker reveal">
+        <h3>Dial in the behaviour</h3>
+        <p class="lead">Every toggle is a real switch in Settings. Tap to try:</p>
+        <div class="toggles">
+          <div class="tgl on" data-tgl><span class="sw"></span><span class="tx">Wander<small>takes little strolls along the Dock</small></span></div>
+          <div class="tgl on" data-tgl><span class="sw"></span><span class="tx">Eyes follow cursor<small>Pip watches your pointer</small></span></div>
+          <div class="tgl" data-tgl><span class="sw"></span><span class="tx">Sleepy<small>dozes off when you leave it alone</small></span></div>
+          <div class="tgl on" data-tgl><span class="sw"></span><span class="tx">Peek mode<small>stays hidden until there's a nudge</small></span></div>
+        </div>
+        <p class="upload-note"><b>Bring your own character.</b> Drop in any SVG or image and FocusMe animates the named parts for you:</p>
+        <div class="chips">
+          <span class="chip">eyes</span><span class="chip">pupils</span><span class="chip">mouth</span>
+          <span class="chip">arm-left</span><span class="chip">arm-right</span><span class="chip">antenna</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ CHAT DEMO ============================ -->
+<section class="band">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="kicker">Just talk to it</div>
+      <h2>Triple-tap. Type. Done.</h2>
+      <p>Slash-commands to do things, a question mark to ask things.</p>
+    </div>
+    <div class="chatwrap">
+      <div class="chat sticker reveal" id="chat">
+        <div class="row"><div class="q"><span class="cmd">/timer 25</span></div></div>
+        <div class="row"><div class="a"><b>Focus session started — 25 min. You've got this. ⏳</b></div></div>
+        <div class="row"><div class="q"><span class="cmd">/every 2h stand and stretch</span></div></div>
+        <div class="row"><div class="a"><b>Done — every 2 h, I'll nudge you: stand and stretch 🙆</b></div></div>
+        <div class="row"><div class="q">battery?</div></div>
+        <div class="row"><div class="a"><b>Battery 72% · about 3h 10m left 🔋</b><small>healthy · not charging</small></div></div>
+        <div class="row" id="chatLive"><div class="q"><span id="typed"></span><span class="caret"></span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FAQ ============================ -->
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="kicker">Good questions</div>
+      <h2>Before you download.</h2>
+    </div>
+    <div class="faq">
+      <details class="qa sticker reveal"><summary>Is it safe to install?<span class="plus">+</span></summary>
+        <div class="ans">Yes. FocusMe is open source — you can read every line on GitHub. There's no account and nothing you do leaves your Mac. It just isn't code-signed with a paid Apple certificate yet, so macOS asks you to confirm the very first launch (<b>right-click → Open</b>). After that it opens normally.</div></details>
+      <details class="qa sticker reveal"><summary>Which Macs does it run on?<span class="plus">+</span></summary>
+        <div class="ans">Apple Silicon Macs (M1 and newer) on macOS 11 or later.</div></details>
+      <details class="qa sticker reveal"><summary>Is it really free?<span class="plus">+</span></summary>
+        <div class="ans">Completely. Free and open source, no trial, no upsell, no ads.</div></details>
+      <details class="qa sticker reveal"><summary>Does it phone home or use AI?<span class="plus">+</span></summary>
+        <div class="ans">No cloud and no LLM — the chat answers run entirely on your machine. The only network call is a once-a-day check to GitHub to see if a newer version is out (and weather, if you ask for it).</div></details>
+      <details class="qa sticker reveal"><summary>How do updates work?<span class="plus">+</span></summary>
+        <div class="ans">When a new release is out, Pip shows an "Update" bubble with a download button. Grab the new <code>FocusMe.zip</code> and drop it in — you're current.</div></details>
+      <details class="qa sticker reveal"><summary>How do I remove it?<span class="plus">+</span></summary>
+        <div class="ans">Quit it from the menu-bar icon, then drag <code>FocusMe.app</code> to the Trash. Nothing lingers.</div></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ FINAL CTA ============================ -->
+<section class="band final">
+  <div class="blobs"><span class="blob b1"></span><span class="blob b2"></span></div>
+  <div class="wrap">
+    <svg class="pipwave float reveal" viewBox="0 0 200 206" aria-hidden="true"><use href="#pip-full"/></svg>
+    <h2 class="reveal">Give your desk a little life.</h2>
+    <p class="reveal">Free, open source, and runs quiet in your menu bar. Pip's waiting. 🫧</p>
+    <div class="cta-row reveal" style="justify-content:center;margin-top:1.4rem">
+      <a class="btn" href="https://github.com/ShyamGanesh13/focusme/releases/latest" target="_blank" rel="noopener"><span class="dl">⬇</span> Download for macOS</a>
+      <a class="btn ghost" href="https://github.com/ShyamGanesh13/focusme" target="_blank" rel="noopener">★ Star on GitHub</a>
+    </div>
+    <p class="reveal" style="margin-top:1rem;font-size:.85rem">First launch: it's unsigned, so <b>right-click → Open</b> once to get past Gatekeeper.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="brand" style="font-size:1.1rem;gap:.4rem">
+      <svg viewBox="0 0 200 200" width="26" height="26" aria-hidden="true"><use href="#pip-mini"/></svg>FocusMe
+    </span>
+    <span class="ft-sp"></span>
+    <span>Built with Tauri + Rust · macOS 11+</span>
+    <a href="https://github.com/ShyamGanesh13/focusme" target="_blank" rel="noopener">github.com/ShyamGanesh13/focusme</a>
+  </div>
+</footer>
+
+<!-- ============================ SPRITES ============================ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <radialGradient id="pipFur" cx="40%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#9fd6ff"/><stop offset="1" stop-color="#5aa9f0"/>
+    </radialGradient>
+    <g id="pip-full">
+      <ellipse cx="100" cy="200" rx="54" ry="8" fill="rgba(0,0,0,.18)"/>
+      <g id="feet"><ellipse cx="74" cy="190" rx="20" ry="9" fill="#3f86cf"/><ellipse cx="126" cy="190" rx="20" ry="9" fill="#3f86cf"/></g>
+      <g id="antenna"><path d="M100 58 C 100 40, 108 30, 116 22" fill="none" stroke="#3f86cf" stroke-width="5" stroke-linecap="round"/><circle cx="118" cy="20" r="9" fill="#ffd166"/></g>
+      <g id="arm-left"><rect x="22" y="104" width="22" height="46" rx="11" fill="#4f9be6" transform="rotate(18 33 110)"/></g>
+      <g id="arm-right"><rect x="156" y="104" width="22" height="46" rx="11" fill="#4f9be6" transform="rotate(-18 167 110)"/></g>
+      <g id="body"><ellipse cx="100" cy="122" rx="66" ry="68" fill="url(#pipFur)"/><ellipse cx="100" cy="146" rx="38" ry="30" fill="#d8efff" opacity=".7"/></g>
+      <g id="face">
+        <ellipse cx="66" cy="124" rx="10" ry="6" fill="#ff8fab" opacity=".55"/><ellipse cx="134" cy="124" rx="10" ry="6" fill="#ff8fab" opacity=".55"/>
+        <g id="eyes">
+          <g id="eye-left"><ellipse cx="78" cy="102" rx="15" ry="18" fill="#fff"/><g class="pupil"><circle cx="80" cy="104" r="9" fill="#1f2433"/><circle cx="83" cy="100" r="3.2" fill="#fff"/></g></g>
+          <g id="eye-right"><ellipse cx="122" cy="102" rx="15" ry="18" fill="#fff"/><g class="pupil"><circle cx="124" cy="104" r="9" fill="#1f2433"/><circle cx="127" cy="100" r="3.2" fill="#fff"/></g></g>
+        </g>
+        <path id="mouth" d="M90 130 Q100 141 110 130" fill="none" stroke="#1f2433" stroke-width="4" stroke-linecap="round"/>
+      </g>
+    </g>
+    <g id="pip-mini">
+      <g><path d="M100 58 C 100 40, 108 30, 116 22" fill="none" stroke="#3f86cf" stroke-width="7" stroke-linecap="round"/><circle cx="118" cy="20" r="11" fill="#ffd166"/></g>
+      <ellipse cx="100" cy="122" rx="70" ry="72" fill="url(#pipFur)"/>
+      <ellipse cx="78" cy="104" rx="14" ry="17" fill="#fff"/><circle cx="80" cy="106" r="8" fill="#1f2433"/>
+      <ellipse cx="122" cy="104" rx="14" ry="17" fill="#fff"/><circle cx="124" cy="106" r="8" fill="#1f2433"/>
+      <path d="M90 132 Q100 143 110 132" fill="none" stroke="#1f2433" stroke-width="5" stroke-linecap="round"/>
+    </g>
+  </defs>
+</svg>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var finePointer = window.matchMedia("(pointer:fine)").matches;
+
+  /* theme toggle */
+  var root=document.documentElement, tb=document.getElementById("themeBtn");
+  try{ var saved=localStorage.getItem("fm-theme"); if(saved) root.setAttribute("data-theme",saved); }catch(e){}
+  if(tb) tb.addEventListener("click",function(){
+    var cur=root.getAttribute("data-theme");
+    if(!cur) cur=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";
+    var next=cur==="dark"?"light":"dark";
+    root.setAttribute("data-theme",next);
+    try{ localStorage.setItem("fm-theme",next); }catch(e){}
+  });
+
+  /* scroll progress bar */
+  var pb=document.getElementById("progress");
+  function onScroll(){
+    var h=document.documentElement.scrollHeight-window.innerHeight;
+    var p=h>0?(window.scrollY/h):0;
+    if(pb) pb.style.width=(p*100).toFixed(2)+"%";
+  }
+  window.addEventListener("scroll",onScroll,{passive:true}); onScroll();
+
+  /* eyes follow pointer */
+  var hero=document.getElementById("pipHero");
+  window.addEventListener("pointermove",function(e){
+    if(!hero) return;
+    var r=hero.getBoundingClientRect();
+    var cx=r.left+r.width/2, cy=r.top+r.height*0.5;
+    var dx=Math.max(-1,Math.min(1,(e.clientX-cx)/260)), dy=Math.max(-1,Math.min(1,(e.clientY-cy)/260));
+    hero.querySelectorAll(".pupil").forEach(function(p){ p.style.transform="translate("+(dx*4.5).toFixed(2)+"px,"+(dy*3).toFixed(2)+"px)"; });
+  },{passive:true});
+
+  /* blink + idle wave */
+  function waveNow(){ if(hero){ hero.classList.remove("waving"); void hero.offsetWidth; hero.classList.add("waving"); } }
+  if(!reduce){
+    (function blink(){ if(hero){ hero.classList.add("blinking"); setTimeout(function(){hero.classList.remove("blinking");},240);} setTimeout(blink,2400+Math.random()*4000); })();
+    setInterval(function(){ if(!document.hidden && Math.random()<.6) waveNow(); }, 9000);
+  }
+
+  /* pat / wave on tap + reaction */
+  var stage=document.getElementById("pipStage");
+  var reactions=["Hehe that tickles 😌","I'm up, I'm up!","You got this 💪","Water break? 💧","Nice to see you ✨"];
+  if(stage) stage.addEventListener("click",function(){ waveNow(); showBubble("Pip says",reactions[Math.floor(Math.random()*reactions.length)]); });
+
+  /* speech bubbles */
+  var bubble=document.getElementById("bubble"), bTag=document.getElementById("bub-tag"), bText=document.getElementById("bub-text");
+  var lines=[["Reminder","Stand up & stretch 🙆"],["Pip says","Sipping water yet? 💧"],["Focus","24 min left — keep going!"],["Daily","Chia seeds at 11:30 🌱"],["Pip says","Triple-tap me to chat 👋"]];
+  var bi=0, hold=false;
+  function showBubble(tag,text){ if(!bubble) return; hold=true; bubble.classList.add("hide");
+    setTimeout(function(){ bTag.textContent=tag; bText.textContent=text; bubble.classList.remove("hide"); setTimeout(function(){hold=false;},2600); },320); }
+  if(!reduce) setInterval(function(){ if(hold) return; bi=(bi+1)%lines.length; bubble.classList.add("hide");
+    setTimeout(function(){ bTag.textContent=lines[bi][0]; bText.textContent=lines[bi][1]; bubble.classList.remove("hide"); },320); },3800);
+
+  /* focus countdown + progress ring */
+  var badgeT=document.getElementById("badgeT"), ring=document.getElementById("ring");
+  var total=25*60, left=24*60+51, C=2*Math.PI*22;
+  if(ring) ring.style.strokeDasharray=C.toFixed(1);
+  function tick(){
+    left = left>0 ? left-1 : total-9;
+    var m=Math.floor(left/60), s=left%60;
+    if(badgeT) badgeT.textContent=m+":"+(s<10?"0":"")+s;
+    if(ring) ring.style.strokeDashoffset=(C*(1-left/total)).toFixed(1);
+  }
+  if(badgeT && !reduce){ tick(); setInterval(tick,1000); }
+
+  /* cursor parallax on the scene layers */
+  var scene=document.getElementById("scene");
+  if(scene && finePointer && !reduce){
+    var layers=scene.querySelectorAll(".layer"), raf=0, tx=0, ty=0;
+    scene.addEventListener("pointermove",function(e){
+      var r=scene.getBoundingClientRect();
+      tx=((e.clientX-r.left)/r.width-0.5); ty=((e.clientY-r.top)/r.height-0.5);
+      if(!raf) raf=requestAnimationFrame(apply);
+    });
+    scene.addEventListener("pointerleave",function(){ tx=0; ty=0; if(!raf) raf=requestAnimationFrame(apply); });
+    function apply(){ raf=0; layers.forEach(function(l){ if(l===stage && stage.dataset.dragged) return;
+      var d=parseFloat(l.dataset.depth||"0"); l.style.transform="translate("+(tx*d).toFixed(1)+"px,"+(ty*d).toFixed(1)+"px)"; }); }
+  }
+
+  /* size slider */
+  var rng=document.getElementById("scaleRng"), lab=document.getElementById("scaleLab"), pipScale=document.getElementById("pipScale");
+  function applyScale(v){ if(pipScale) pipScale.style.setProperty("--pipscale",v); if(lab) lab.textContent="drag me · "+Math.round(140*v)+"px tall"; }
+  if(rng){ rng.addEventListener("input",function(){ applyScale(parseFloat(rng.value)); }); applyScale(1); }
+
+  /* toggle demo */
+  document.querySelectorAll("[data-tgl]").forEach(function(t){ t.addEventListener("click",function(){ t.classList.toggle("on"); }); });
+
+  /* chat typing */
+  var typed=document.getElementById("typed");
+  var phrases=["weather?","/remind call mom at 6pm","/water 30","notes?","/daily 9am vitamins","cpu?"];
+  if(typed && !reduce){ var pi=0,ci=0,dir=1;
+    (function type(){ var w=phrases[pi]; typed.textContent=w.slice(0,ci); ci+=dir; var delay=dir>0?85:35;
+      if(ci>w.length){dir=-1;ci=w.length;delay=1400;} else if(ci<0){dir=1;ci=0;pi=(pi+1)%phrases.length;delay=400;}
+      setTimeout(type,delay); })();
+  } else if(typed){ typed.textContent="weather?"; }
+
+  /* scroll reveal */
+  if("IntersectionObserver" in window && !reduce){
+    var io=new IntersectionObserver(function(ents){ ents.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add("in"); io.unobserve(en.target); } }); },{threshold:.12,rootMargin:"0px 0px -8% 0px"});
+    document.querySelectorAll(".reveal").forEach(function(el){ io.observe(el); });
+    setTimeout(function(){ document.querySelectorAll(".reveal:not(.in)").forEach(function(el){ if(el.getBoundingClientRect().top<window.innerHeight) el.classList.add("in"); }); },60);
+  } else { document.querySelectorAll(".reveal").forEach(function(el){ el.classList.add("in"); }); }
+
+  /* drag Pip */
+  if(stage && scene){
+    var drag=null;
+    stage.addEventListener("pointerdown",function(e){ drag={x:e.clientX,y:e.clientY,r:stage.getBoundingClientRect(),sr:scene.getBoundingClientRect()}; stage.dataset.dragged="1"; stage.style.transform=""; stage.setPointerCapture(e.pointerId); });
+    stage.addEventListener("pointermove",function(e){ if(!drag) return;
+      var nx=e.clientX-drag.x, ny=e.clientY-drag.y;
+      stage.style.right="auto";
+      stage.style.left=Math.max(4,Math.min(drag.r.left-drag.sr.left+nx,drag.sr.width-drag.r.width-4))+"px";
+      stage.style.bottom=Math.max(28,Math.min(drag.sr.bottom-drag.r.bottom-ny,drag.sr.height-drag.r.height-30))+"px"; });
+    function dend(){ drag=null; } stage.addEventListener("pointerup",dend); stage.addEventListener("pointercancel",dend);
+  }
+})();
+</script>
