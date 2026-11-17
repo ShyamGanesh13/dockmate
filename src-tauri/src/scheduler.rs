@@ -100,7 +100,21 @@ fn beat(app: &AppHandle) {
         }
     };
     if let Some(m) = done {
-        notify("Focus session done", &format!("{m} minutes up — take a short break."));
+        let (today_n, streak) = {
+            let mut cfg = state.config.lock().unwrap();
+            let today = now.format("%Y-%m-%d").to_string();
+            let yesterday = (now.date_naive() - Duration::days(1)).format("%Y-%m-%d").to_string();
+            cfg.focus.bump(&today, &yesterday);
+            let r = (cfg.focus.today, cfg.focus.streak);
+            state.save_config(&cfg);
+            r
+        };
+        let mut body = format!("{m} minutes up — that's {today_n} today");
+        if streak >= 2 {
+            body.push_str(&format!(" · {streak}-day streak 🔥"));
+        }
+        body.push_str(". Take a short break.");
+        notify("Focus session done", &body);
         let _ = app.emit("session-done", m);
     }
     let _ = app.emit("tick", Tick { session_left: left, session_total: total, session_paused: paused, bedtime });

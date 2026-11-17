@@ -132,7 +132,7 @@ pub fn intent(q: &str) -> Intent {
     if has(&["internet", "online", "offline", "wifi", "wi-fi", "network", "connected"]) {
         return Intent::Internet;
     }
-    if has(&["timer", "session", "focus", "pomodoro", "left"]) {
+    if has(&["timer", "session", "sessions", "focus", "pomodoro", "left", "streak"]) {
         return Intent::Timer;
     }
     if has(&["reminder", "reminders", "remind"]) {
@@ -273,6 +273,7 @@ pub fn help() -> Answer {
         vec![
             "Ask: battery?  memory?  cpu?  disk?  uptime?  internet?".into(),
             "weather?  ·  weather in Chennai?  ·  time?  ·  notes?  ·  reminders?".into(),
+            "focus?  — today's finished sessions and your day streak".into(),
             "Focus: /timer 25  ·  /stop".into(),
             "Remind once: /remind call Kavi at 5pm".into(),
             "Every day: /daily 11:30 chia seeds  ·  /daily 3:30pm ABC milk".into(),
@@ -309,6 +310,8 @@ mod tests {
         assert_eq!(intent("weather in Coimbatore?"), Intent::Weather(Some("Coimbatore".into())));
         assert_eq!(intent("will it rain today?"), Intent::Weather(None));
         assert_eq!(intent("how much time left on the timer?"), Intent::Timer);
+        assert_eq!(intent("what's my streak?"), Intent::Timer);
+        assert_eq!(intent("how many sessions today?"), Intent::Timer);
         assert_eq!(intent("what time is it?"), Intent::Clock);
         assert_eq!(intent("notes?"), Intent::Notes);
         assert_eq!(intent("hey"), Intent::Greeting);

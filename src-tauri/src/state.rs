@@ -80,6 +80,32 @@ pub struct WeatherCfg {
     pub city: String,
 }
 
+/// Focus-session tally: how many sessions finished on `day` (YYYY-MM-DD) and
+/// the run of consecutive days with at least one finished session. Bumped once
+/// each time a session completes; surfaced in the finish nudge and in chat.
+#[derive(Serialize, Deserialize, Clone, Debug, Default, PartialEq)]
+#[serde(default, rename_all = "camelCase")]
+pub struct FocusStats {
+    pub today: u32,
+    pub day: String,
+    pub streak: u32,
+}
+
+impl FocusStats {
+    /// Record one finished session. `today`/`yesterday` are YYYY-MM-DD. The
+    /// streak grows when the previous finish was yesterday, resets to 1 on a
+    /// gap (or the first ever finish, when `day` is empty).
+    pub fn bump(&mut self, today: &str, yesterday: &str) {
+        if self.day == today {
+            self.today += 1;
+        } else {
+            self.streak = if self.day == yesterday { self.streak + 1 } else { 1 };
+            self.day = today.to_string();
+            self.today = 1;
+        }
+    }
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
 pub struct Reminder {
@@ -140,6 +166,8 @@ pub struct Config {
     pub water: WaterCfg,
     pub bedtime: BedtimeCfg,
     pub weather: WeatherCfg,
+    /// Completed-focus-session tally and day streak.
+    pub focus: FocusStats,
     pub reminders: Vec<Reminder>,
     pub routines: Vec<Routine>,
     /// Reminders that repeat every day at a set time.
@@ -158,6 +186,7 @@ impl Default for Config {
             water: WaterCfg::default(),
             bedtime: BedtimeCfg::default(),
             weather: WeatherCfg::default(),
+            focus: FocusStats::default(),
             reminders: Vec::new(),
             routines: Vec::new(),
             daily: Vec::new(),
@@ -312,5 +341,27 @@ impl AppState {
 
     pub fn character_path(&self) -> PathBuf {
         self.dir.join("character.svg")
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::FocusStats;
+
+    #[test]
+    fn streak_rolls_and_resets() {
+        let mut f = FocusStats::default();
+        // first ever finish → day 1, streak 1
+        f.bump("2026-11-17", "2026-11-16");
+        assert_eq!((f.today, f.streak), (1, 1));
+        // second finish same day → count up, streak unchanged
+        f.bump("2026-11-17", "2026-11-16");
+        assert_eq!((f.today, f.streak), (2, 1));
+        // next day, finished yesterday → streak 2, today resets to 1
+        f.bump("2026-11-18", "2026-11-17");
+        assert_eq!((f.today, f.streak), (1, 2));
+        // skip a day → streak resets to 1
+        f.bump("2026-11-20", "2026-11-19");
+        assert_eq!((f.today, f.streak), (1, 1));
     }
 }

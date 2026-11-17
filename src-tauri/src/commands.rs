@@ -504,10 +504,26 @@ fn answer_question(state: &AppState, q: &str) -> Answer {
             let city = place.unwrap_or_else(|| state.config.lock().unwrap().weather.city.clone());
             weather::weather(&city)
         }
-        Intent::Timer => match status_of(state).session_left {
-            Some(left) => Answer::answer(&format!("Focus session: {}:{:02} left", left / 60, left % 60), vec![]),
-            None => Answer::answer("No focus session running.", vec!["Start one with /timer 25".into()]),
-        },
+        Intent::Timer => {
+            let (today_n, streak) = {
+                let f = &state.config.lock().unwrap().focus;
+                let today = Local::now().format("%Y-%m-%d").to_string();
+                // Only count if the tally is actually for today.
+                if f.day == today { (f.today, f.streak) } else { (0, 0) }
+            };
+            let tally = match (today_n, streak) {
+                (0, _) => "None done yet today — start one with /timer 25".to_string(),
+                (n, s) if s >= 2 => format!("{n} done today · {s}-day streak 🔥"),
+                (n, _) => format!("{n} done today 🔥"),
+            };
+            match status_of(state).session_left {
+                Some(left) => Answer::answer(
+                    &format!("Focus session: {}:{:02} left", left / 60, left % 60),
+                    vec![tally],
+                ),
+                None => Answer::answer("No focus session running.", vec![tally]),
+            }
+        }
         Intent::Notes => {
             let notes = state.notes.lock().unwrap();
             match notes.last() {
@@ -546,7 +562,7 @@ fn answer_question(state: &AppState, q: &str) -> Answer {
             let now = Local::now();
             Answer::answer(&format!("It's {}", now.format("%-I:%M %p")), vec![now.format("%A, %-d %B %Y").to_string()])
         }
-        Intent::Name => Answer::answer("I'm DeskPal, your desk buddy.", vec![]),
+        Intent::Name => Answer::answer("I'm Dockmate, your desk buddy.", vec![]),
         Intent::Unknown => Answer::error(
             "I don't know that one yet.",
             vec!["Try: battery? memory? weather? disk? timer?".into(), "Or type help for everything.".into()],
