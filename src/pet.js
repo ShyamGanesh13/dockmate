@@ -440,6 +440,12 @@ function hop(height = 13) {
   );
 }
 
+// A confetti burst — a few emotes popping up, staggered. Pairs with a hop for
+// a celebratory reaction (e.g. a finished focus session).
+function celebrate(emoji = "🎉", n = 4) {
+  for (let i = 0; i < n; i++) setTimeout(() => spawn("party", emoji), i * 110);
+}
+
 // Glance left, then right, then recenter — a cheap "looking around" idle beat.
 // Only runs if the artwork has pupils; cursor-follow takes back over on move.
 async function glance(mine) {
@@ -775,19 +781,34 @@ listen("session-busy", () => {
 });
 listen("session-paused", () => { peekFor(3000); say("Focus paused.", { ms: 2500 }); });
 listen("session-resumed", () => { peekFor(2500); say("Back to it.", { ms: 2000 }); });
-listen("session-done", () => {
+listen("session-done", ({ payload }) => {
+  // Payload is { minutes, today, streak } (older/preview builds send a number).
+  const p = (payload && typeof payload === "object") ? payload : { minutes: payload };
+  const today = p.today || 0, streak = p.streak || 0;
+  const big = streak >= 2;            // a running day-streak → a bigger party
   badgeEl.hidden = true;
   if (cfg.session.chime) chime("done");
   forcedSleep = false;
   touched();
-  pat();
-  setTimeout(() => { peekFor(PEEK.long); say("Session done! Take a short break.", {
+  // Stop whatever it was doing and throw a little party.
+  interrupt();
+  mode = "idle";
+  petEl.classList.remove("sleeping");
+  char && char.setEyes(1);
+  hop(19);
+  setTimeout(() => hop(13), 240);
+  celebrate(big ? "🔥" : "🎉", big ? 5 : 4);
+  const tally = today > 0
+    ? (big ? `That's ${today} today · ${streak}-day streak 🔥` : `That's ${today} today 🎉`)
+    : "Nice work.";
+  setTimeout(() => { peekFor(PEEK.long); say(`Session done! ${tally} Take a short break.`, {
     ms: 0, alert: true,
     actions: [
       { label: "Another " + (cfg.session.minutes || 25), act: () => invoke("start_session", {}) },
       { label: "Done", act: () => {} },
     ],
-  }); }, 650);
+  }); }, 720);
+  setTimeout(brain, 1100);           // resume idle life after the celebration
 });
 listen("reminder", ({ payload: r }) => {
   chime("remind");

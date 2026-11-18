@@ -29,7 +29,7 @@ const mock = (() => {
   let sessionTotal = 0;
   setInterval(() => {
     const left = sessionEnd ? Math.max(0, Math.round((sessionEnd - Date.now()) / 1000)) : null;
-    if (sessionEnd && left === 0) { sessionEnd = 0; mockEmit("session-done", sessionTotal / 60); }
+    if (sessionEnd && left === 0) { sessionEnd = 0; mockEmit("session-done", { minutes: sessionTotal / 60, today: 1, streak: 1 }); }
     mockEmit("tick", { sessionLeft: sessionEnd ? left : null, sessionTotal: sessionEnd ? sessionTotal : null, bedtime: false });
   }, 1000);
   const stamp = () => new Date().toISOString().slice(0, 16);

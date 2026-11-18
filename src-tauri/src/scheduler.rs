@@ -115,7 +115,10 @@ fn beat(app: &AppHandle) {
         }
         body.push_str(". Take a short break.");
         notify("Focus session done", &body);
-        let _ = app.emit("session-done", m);
+        let _ = app.emit(
+            "session-done",
+            serde_json::json!({ "minutes": m, "today": today_n, "streak": streak }),
+        );
     }
     let _ = app.emit("tick", Tick { session_left: left, session_total: total, session_paused: paused, bedtime });
 
