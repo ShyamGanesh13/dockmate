@@ -33,11 +33,19 @@ pub struct PetCfg {
     /// (peek keeps it tucked off-screen, which reads as "nothing launched").
     #[serde(default)]
     pub peek: bool,
+    /// Where the pet lives: "dock" (bottom-right corner, the default) or "top"
+    /// (perched at the top of the screen — under the notch on notched Macs).
+    #[serde(default = "default_dock")]
+    pub home: String,
+}
+
+fn default_dock() -> String {
+    "dock".into()
 }
 
 impl Default for PetCfg {
     fn default() -> Self {
-        Self { user_name: String::new(), scale: 1.0, speed: 1.0, wander: true, sleepy: true, follow: true, peek: false }
+        Self { user_name: String::new(), scale: 1.0, speed: 1.0, wander: true, sleepy: true, follow: true, peek: false, home: default_dock() }
     }
 }
 

@@ -36,6 +36,7 @@ const binds = [
   ["wander", "checked", () => cfg.pet.wander, (v) => (cfg.pet.wander = v)],
   ["sleepy", "checked", () => cfg.pet.sleepy, (v) => (cfg.pet.sleepy = v)],
   ["follow", "checked", () => cfg.pet.follow, (v) => (cfg.pet.follow = v)],
+  ["home", "value", () => cfg.pet.home || "dock", (v) => (cfg.pet.home = v)],
   ["city", "value", () => cfg.weather.city, (v) => (cfg.weather.city = v.trim())],
   ["sessionMinutes", "value", () => cfg.session.minutes, (v) => (cfg.session.minutes = num(v, 1, 600, 25))],
   ["chimeOn", "checked", () => cfg.session.chime, (v) => (cfg.session.chime = v)],

@@ -41,14 +41,22 @@ let vx = 0, vy = 0;
 
 const floorY = () => window.innerHeight;
 const maxX = () => Math.max(0, window.innerWidth - W);
-const petTop = () => floorY() - H - lift;
+
+// Home: "dock" (bottom-right corner, walks the Dock line) or "top" (perched at
+// the top-centre, under the notch on notched Macs — no floor, no gravity).
+// `lift` means px ABOVE the floor in dock mode, px BELOW the top edge in top.
+const TOP_GAP = 8;
+const topMode = () => cfg.pet.home === "top";
+const petTop = () => topMode() ? (TOP_GAP + lift) : (floorY() - H - lift);
 
 // The pet lives in the bottom-right corner and only strolls within a small
 // zone there — a few steps, not the whole bar. Dragging can still take it
-// anywhere; it walks back into the zone when you let go.
+// anywhere; it walks back into the zone when you let go. In top mode it just
+// perches at centre.
 const EDGE_GAP = 16;
 const roamMax = () => Math.max(0, maxX() - EDGE_GAP);
 const roamMin = () => Math.max(0, roamMax() - 3.0 * W);
+const homeX = () => topMode() ? (maxX() / 2) : clamp(x, roamMin(), roamMax());
 
 // ------------------------------------------------------------ peek mode
 // When on, the pet rests hidden just below the bottom edge and only slides up
@@ -80,12 +88,16 @@ function applySize() {
   if (mode === "drag" || mode === "fall") {
     x = clamp(x, 0, maxX());
   } else {
-    x = clamp(x, roamMin(), roamMax());
+    x = topMode() ? (maxX() / 2) : clamp(x, roamMin(), roamMax());
   }
 }
 
 function place() {
-  const drop = (1 - shown) * (H + 60); // how far below the floor while hidden
+  // In top mode the pet hangs from the ceiling, so bubbles/arrows flip to open
+  // downward (see #pet.top rules in pet.css).
+  petEl.classList.toggle("top", topMode());
+  // Hidden slides off the nearest edge: down in dock mode, up in top mode.
+  const drop = (1 - shown) * (H + 60) * (topMode() ? -1 : 1);
   petEl.style.transform = `translate(${x}px, ${petTop() + drop}px)`;
   artEl.style.transform = `translateY(${-bob}px) rotate(${tilt}deg) scaleX(${facing * sx}) scaleY(${sy})`;
 }
@@ -192,6 +204,7 @@ function frame(now) {
     tilt *= 0.8;
     sx += (1 - sx) * 0.2;
     sy += (1 - sy) * 0.2;
+    if (topMode()) lift += (0 - lift) * 0.2;   // ease back up to the perch
   }
 
   // Peek: ease toward hidden/shown, and clear a lingering bubble as it leaves.
@@ -306,18 +319,19 @@ async function brain() {
   const mine = interrupt();
   mode = "idle";
   setBreathe(true);
-  // Peek mode: no wandering or dozing — rest tucked in the corner until a nudge.
-  if (peekMode) { x = roamMax(); return; }
+  if (topMode()) x = maxX() / 2;   // perch at centre
+  // Peek mode: no wandering or dozing — rest tucked away until a nudge.
+  if (peekMode) { x = homeX(); return; }
   await pause(400, mine);
-  // If a drag left the pet outside its corner zone, amble back into it first.
-  if (x < roamMin() - 2 || x > roamMax() + 2) {
+  // Dock mode: if a drag left the pet outside its corner zone, amble back in.
+  if (!topMode() && (x < roamMin() - 2 || x > roamMax() + 2)) {
     await walkTo(clamp(x, roamMin(), roamMax()), mine);
     setBreathe(true);
   }
   while (!stale(mine)) {
     if (shouldSleep()) { await doze(mine); continue; }
     const r = Math.random();
-    if (cfg.pet.wander && r < 0.34) {
+    if (cfg.pet.wander && !topMode() && r < 0.34) {
       // a step or two within the bottom-right zone
       const lo = roamMin(), hi = roamMax();
       const step = Math.min(Math.max(0, hi - lo), 1.2 * W);
@@ -383,7 +397,9 @@ artEl.addEventListener("pointermove", (e) => {
     vx = vx * 0.6 + ((e.clientX - press.lx) / dt) * 0.4;
     press.lx = e.clientX; press.lt = now;
     x = clamp(e.clientX - press.ox, 0, maxX());
-    lift = Math.max(0, floorY() - H - (e.clientY - press.oy));
+    lift = topMode()
+      ? Math.max(0, (e.clientY - press.oy) - TOP_GAP)        // px below the top edge
+      : Math.max(0, floorY() - H - (e.clientY - press.oy));  // px above the floor
   }
 });
 
@@ -394,7 +410,8 @@ function endPress(e) {
   hold = false;
   sendHit(true);
   if (wasDrag) {
-    if (lift > 2) { mode = "fall"; vy = 0; vx = clamp(vx, -900, 900); }
+    if (topMode()) { mode = "idle"; tilt = 0; setTimeout(brain, 350); } // ease back to the perch
+    else if (lift > 2) { mode = "fall"; vy = 0; vx = clamp(vx, -900, 900); }
     else land();
   } else if (e.type === "pointerup") {
     // 1 tap = 😎, 2 = hello, 3 = chat. Wait briefly to see if more taps follow.
@@ -578,7 +595,14 @@ function reflect() {
 function positionChat() {
   const w = 320;
   chatEl.style.left = clamp(x + W / 2 - w / 2, 8, window.innerWidth - w - 8) + "px";
-  chatEl.style.bottom = window.innerHeight - petTop() + (badgeEl.hidden ? 14 : 34) + "px";
+  if (topMode()) {
+    // Pet hangs from the top, so the chat drops down from under its feet.
+    chatEl.style.bottom = "auto";
+    chatEl.style.top = petTop() + H + 12 + "px";
+  } else {
+    chatEl.style.top = "auto";
+    chatEl.style.bottom = window.innerHeight - petTop() + (badgeEl.hidden ? 14 : 34) + "px";
+  }
 }
 
 function openChat() {
@@ -870,11 +894,14 @@ listen("bedtime", () => {
 listen("cursor", ({ payload }) => onCursor(payload));
 listen("open-chat", () => openChat());
 listen("config-changed", ({ payload }) => {
+  const wasHome = cfg.pet.home;
   cfg = payload;
   const wasPeek = peekMode;
   peekMode = !!cfg.pet.peek;
   applySize();
-  if (peekMode !== wasPeek) { peekUntil = 0; brain(); } // re-park or resume roaming
+  const homeChanged = (cfg.pet.home || "dock") !== (wasHome || "dock");
+  if (homeChanged) { lift = 0; bob = 0; tilt = 0; sx = 1; sy = 1; x = homeX(); }
+  if (peekMode !== wasPeek || homeChanged) { peekUntil = 0; brain(); } // re-home / resume
 });
 listen("character-changed", () => mountCharacter());
 listen("pet-visible", ({ payload: v }) => { if (v) brain(); });

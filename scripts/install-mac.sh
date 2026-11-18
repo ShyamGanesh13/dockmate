@@ -40,7 +40,9 @@ rm -rf "$DEST"
 cp -R "$BUNDLE" "$DEST"
 
 echo "▶ Launching the new build…"
-open -n "$DEST"
+# No -n: we already quit the old copy above, so a plain open launches exactly
+# one fresh instance instead of stacking another on top.
+open "$DEST"
 
 [ -d "/Applications/$APP_NAME" ] && echo "ℹ An older copy is in /Applications — drag it to the Trash when you can (needs admin)."
 
