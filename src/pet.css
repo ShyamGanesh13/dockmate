@@ -192,6 +192,16 @@ html, body {
 #sign.alert .plank { background: linear-gradient(176deg, #8a5a2e, #6b3f1c); border-color: #4a2f16; }
 #sign.alert .sign-main { font-size: 14px; }
 #sign.alert .sign-sub { color: #ffe6b8; }
+#sign .sign-actions { display: none; }
+#sign .sign-actions:not(:empty) { display: flex; gap: 6px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+#sign .sign-actions button {
+  border: 1px solid rgba(0, 0, 0, .35); border-radius: 7px; padding: 3px 9px; cursor: pointer;
+  font: 600 11px var(--font); white-space: nowrap;
+  background: linear-gradient(#f3e4c8, #e2cda3); color: #4a3418;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .5), 0 1px 2px rgba(0, 0, 0, .3);
+}
+#sign .sign-actions button:first-child { background: linear-gradient(#ffd98a, #f0b94e); color: #4a2f10; }
+#sign .sign-actions button:hover { filter: brightness(1.05); }
 #sign:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 10px; }
 
 /* ---------------------------------------------------------------- effects */

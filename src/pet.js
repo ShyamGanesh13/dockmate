@@ -18,7 +18,7 @@ const petEl = $("pet"), rigEl = $("rig"), artEl = $("art");
 const bubbleEl = $("bubble"), badgeEl = $("badge"), fxEl = $("fx");
 const chatEl = $("chat"), chatLog = $("chatLog"), chatInput = $("chatInput");
 const chatHint = $("chatHint"), chatSend = $("chatSend"), menuEl = $("menu");
-const signEl = $("sign"), signMain = signEl.querySelector(".sign-main"), signSub = signEl.querySelector(".sign-sub");
+const signEl = $("sign"), signMain = signEl.querySelector(".sign-main"), signSub = signEl.querySelector(".sign-sub"), signActions = signEl.querySelector(".sign-actions");
 
 if (!inTauri) $("previewDesk").hidden = false;
 
@@ -114,13 +114,14 @@ function setBreathe(on) {
 // across it for a few seconds — the actionable buttons stay on the OS banner.
 const signMode = () => cfg.pet.home === "sign";
 let sessionLeft = null;            // seconds, mirrored from the tick heartbeat
-let signFlashUntil = 0, signFlashMain = "", signFlashSub = "";
+let signFlashUntil = 0;            // a text-only flash fades after this time…
+let signAwaiting = false;          // …but a nudge with buttons stays until answered
 
 // With "only appear for reminders" on, the sign tucks away and drops down only
 // for a nudge, during a focus session, or while you're interacting with it.
 function signWantsShow() {
   if (!peekMode) return true;
-  if (performance.now() < signFlashUntil) return true;
+  if (signAwaiting || performance.now() < signFlashUntil) return true;
   if (sessionActive) return true;
   if (!menuEl.hidden || !chatEl.hidden) return true;
   return false;
@@ -132,13 +133,14 @@ function updateSign() {
   const tuck = !signWantsShow();
   signEl.classList.toggle("tuck", tuck);
   if (tuck !== wasTucked) sendHit(true);   // clickable area changed
-  if (performance.now() < signFlashUntil) {
-    signMain.textContent = signFlashMain;
-    signSub.textContent = signFlashSub;
+  // A flash (text, or a nudge with buttons) owns the sign while active — leave
+  // its content in place; signFlash built it.
+  if (signAwaiting || performance.now() < signFlashUntil) {
     signEl.classList.add("alert");
     return;
   }
   signEl.classList.remove("alert");
+  signActions.replaceChildren();
   if (sessionActive && sessionLeft != null) {
     signMain.textContent = (sessionPaused ? "❚❚ " : "") + fmt(sessionLeft);
     signSub.textContent = sessionPaused ? "focus · paused" : "focus";
@@ -150,17 +152,39 @@ function updateSign() {
   }
 }
 
-function signFlash(main, sub = "") {
+// Flash a nudge across the sign. With `actions`, it renders Snooze/Done-style
+// buttons (same act() + cross-monitor dismiss as the pet's bubble) and stays
+// put until answered; without them it fades after a few seconds.
+function signFlash(main, sub = "", actions = null) {
   if (!signMode()) return;
-  signFlashMain = main; signFlashSub = sub;
-  signFlashUntil = performance.now() + 9000;
-  updateSign();
+  signMain.textContent = main;
+  signSub.textContent = sub;
+  signActions.replaceChildren();
+  if (actions && actions.length) {
+    signAwaiting = true;
+    signFlashUntil = 0;
+    for (const a of actions) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = a.label;
+      b.addEventListener("click", (e) => { e.stopPropagation(); try { a.act(); } catch (_) {} dismissEverywhere(); });
+      signActions.appendChild(b);
+    }
+  } else {
+    signAwaiting = false;
+    signFlashUntil = performance.now() + 9000;
+  }
+  signEl.classList.add("alert");
+  signEl.classList.remove("tuck");
+  sendHit(true);
 }
 
 function applySignMode() {
   const on = signMode();
   signEl.hidden = !on;
   petEl.style.display = on ? "none" : "";
+  signAwaiting = false; signFlashUntil = 0; signActions.replaceChildren();
+  hush();                        // drop any bubble from the other mode
   if (on) updateSign();
   sendHit(true);
 }
@@ -171,6 +195,7 @@ function openSignMenu() {
   const m = menuEl.getBoundingClientRect(), s = signEl.getBoundingClientRect();
   menuEl.style.left = clamp(s.left + s.width / 2 - m.width / 2, 4, window.innerWidth - m.width - 4) + "px";
   menuEl.style.top = clamp(s.bottom + 8, 4, window.innerHeight - m.height - 4) + "px";
+  hold = true;          // capture the whole overlay so a click anywhere else closes it
   sendHit(true);
 }
 signEl.addEventListener("click", (e) => { e.stopPropagation(); menuEl.hidden ? openSignMenu() : closeMenu(); });
@@ -357,6 +382,11 @@ function dismissEverywhere() {
 function dismissed() {
   hush();
   if (peekMode) peekUntil = performance.now() + PEEK.quick;
+  // clear a nudge showing on the notch sign too
+  signAwaiting = false;
+  signFlashUntil = 0;
+  signActions.replaceChildren();
+  updateSign();
 }
 listen("nudge-dismissed", dismissed);
 
@@ -820,6 +850,7 @@ artEl.addEventListener("contextmenu", (e) => {
 function closeMenu() {
   if (menuEl.hidden) return;
   menuEl.hidden = true;
+  hold = false;         // release the full-overlay capture taken when it opened
   sendHit(true);
 }
 menuEl.addEventListener("click", (e) => {
@@ -835,7 +866,8 @@ menuEl.addEventListener("click", (e) => {
   if (a === "quit") invoke("quit_app");
 });
 document.addEventListener("pointerdown", (e) => {
-  if (!menuEl.hidden && !menuEl.contains(e.target)) closeMenu();
+  // A click on the sign is handled by its own toggle; anything else closes the menu.
+  if (!menuEl.hidden && !menuEl.contains(e.target) && !signEl.contains(e.target)) closeMenu();
 });
 
 // ------------------------------------------------------------ events from Rust
@@ -915,14 +947,15 @@ listen("session-done", ({ payload }) => {
   const tally = today > 0
     ? (big ? `That's ${today} today · ${streak}-day streak 🔥` : `That's ${today} today 🎉`)
     : "Nice work.";
-  signFlash(big ? "Done 🔥" : "Done 🎉", tally);
-  setTimeout(() => { peekFor(PEEK.long); say(`Session done! ${tally} Take a short break.`, {
-    ms: 0, alert: true,
-    actions: [
-      { label: "Another " + (cfg.session.minutes || 25), act: () => invoke("start_session", {}) },
-      { label: "Done", act: () => {} },
-    ],
-  }); }, 720);
+  const acts = [
+    { label: "Another " + (cfg.session.minutes || 25), act: () => invoke("start_session", {}) },
+    { label: "Done", act: () => {} },
+  ];
+  signFlash(big ? "Done 🔥" : "Done 🎉", tally, acts);
+  setTimeout(() => {
+    peekFor(PEEK.long);
+    if (!signMode()) say(`Session done! ${tally} Take a short break.`, { ms: 0, alert: true, actions: acts });
+  }, 720);
   setTimeout(brain, 1100);           // resume idle life after the celebration
 });
 listen("reminder", ({ payload: r }) => {
@@ -931,28 +964,24 @@ listen("reminder", ({ payload: r }) => {
   touched();
   peekFor(PEEK.nudge);
   brain();
-  signFlash(r.text, "Reminder");
-  say(r.text, {
-    ms: 0, alert: true, small: "Reminder",
-    actions: [
-      { label: "Snooze 10m", act: () => invoke("ask", { text: `/remind ${r.text} in 10 min` }) },
-      { label: "Dismiss", act: () => {} },
-    ],
-  });
+  const acts = [
+    { label: "Snooze 10m", act: () => invoke("ask", { text: `/remind ${r.text} in 10 min` }) },
+    { label: "Dismiss", act: () => {} },
+  ];
+  signFlash(r.text, "Reminder", acts);
+  if (!signMode()) say(r.text, { ms: 0, alert: true, small: "Reminder", actions: acts });
 });
 listen("water", () => {
   touched();
   peekFor(PEEK.nudge);
   char && char.wave(1);
-  signFlash("Time for water 💧", "Wellbeing");
-  say("Time for a sip of water 💧", {
-    ms: 0, alert: true,
-    actions: [
-      { label: "Done", act: () => {} },
-      { label: "Snooze 10m", act: () => invoke("snooze_water", { minutes: 10 }) },
-      { label: "Turn off", act: () => invoke("ask", { text: "/water off" }) },
-    ],
-  });
+  const acts = [
+    { label: "Done", act: () => {} },
+    { label: "Snooze 10m", act: () => invoke("snooze_water", { minutes: 10 }) },
+    { label: "Turn off", act: () => invoke("ask", { text: "/water off" }) },
+  ];
+  signFlash("Time for water 💧", "Wellbeing", acts);
+  if (!signMode()) say("Time for a sip of water 💧", { ms: 0, alert: true, actions: acts });
 });
 listen("routine", ({ payload: r }) => {
   chime("remind");
@@ -960,15 +989,13 @@ listen("routine", ({ payload: r }) => {
   touched();
   peekFor(PEEK.nudge);
   brain();
-  signFlash(r.label, "Routine");
-  say(r.label, {
-    ms: 0, alert: true, small: "Routine",
-    actions: [
-      { label: "Done", act: () => {} },
-      { label: "Snooze 10m", act: () => invoke("snooze_routine", { id: r.id, minutes: 10 }) },
-      { label: "Stop", act: () => invoke("set_routine_enabled", { id: r.id, enabled: false }) },
-    ],
-  });
+  const acts = [
+    { label: "Done", act: () => {} },
+    { label: "Snooze 10m", act: () => invoke("snooze_routine", { id: r.id, minutes: 10 }) },
+    { label: "Stop", act: () => invoke("set_routine_enabled", { id: r.id, enabled: false }) },
+  ];
+  signFlash(r.label, "Routine", acts);
+  if (!signMode()) say(r.label, { ms: 0, alert: true, small: "Routine", actions: acts });
 });
 listen("update-available", ({ payload: u }) => {
   touched();
