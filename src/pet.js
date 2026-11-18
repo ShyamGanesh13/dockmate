@@ -18,6 +18,7 @@ const petEl = $("pet"), rigEl = $("rig"), artEl = $("art");
 const bubbleEl = $("bubble"), badgeEl = $("badge"), fxEl = $("fx");
 const chatEl = $("chat"), chatLog = $("chatLog"), chatInput = $("chatInput");
 const chatHint = $("chatHint"), chatSend = $("chatSend"), menuEl = $("menu");
+const signEl = $("sign"), signMain = signEl.querySelector(".sign-main"), signSub = signEl.querySelector(".sign-sub");
 
 if (!inTauri) $("previewDesk").hidden = false;
 
@@ -106,12 +107,92 @@ function setBreathe(on) {
   petEl.classList.toggle("breathe", on);
 }
 
+// ------------------------------------------------------------ notch sign
+// In "Notch sign" home the puppet is replaced by a hanging wooden sign that
+// shows live status: the focus countdown while a session runs, otherwise the
+// clock and streak. Nudges (reminder/water/routine/session) flash their text
+// across it for a few seconds — the actionable buttons stay on the OS banner.
+const signMode = () => cfg.pet.home === "sign";
+let sessionLeft = null;            // seconds, mirrored from the tick heartbeat
+let signFlashUntil = 0, signFlashMain = "", signFlashSub = "";
+
+// With "only appear for reminders" on, the sign tucks away and drops down only
+// for a nudge, during a focus session, or while you're interacting with it.
+function signWantsShow() {
+  if (!peekMode) return true;
+  if (performance.now() < signFlashUntil) return true;
+  if (sessionActive) return true;
+  if (!menuEl.hidden || !chatEl.hidden) return true;
+  return false;
+}
+
+function updateSign() {
+  if (!signMode()) return;
+  const wasTucked = signEl.classList.contains("tuck");
+  const tuck = !signWantsShow();
+  signEl.classList.toggle("tuck", tuck);
+  if (tuck !== wasTucked) sendHit(true);   // clickable area changed
+  if (performance.now() < signFlashUntil) {
+    signMain.textContent = signFlashMain;
+    signSub.textContent = signFlashSub;
+    signEl.classList.add("alert");
+    return;
+  }
+  signEl.classList.remove("alert");
+  if (sessionActive && sessionLeft != null) {
+    signMain.textContent = (sessionPaused ? "❚❚ " : "") + fmt(sessionLeft);
+    signSub.textContent = sessionPaused ? "focus · paused" : "focus";
+  } else {
+    // Idle: just the time and date.
+    const d = new Date();
+    signMain.textContent = d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    signSub.textContent = d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+  }
+}
+
+function signFlash(main, sub = "") {
+  if (!signMode()) return;
+  signFlashMain = main; signFlashSub = sub;
+  signFlashUntil = performance.now() + 9000;
+  updateSign();
+}
+
+function applySignMode() {
+  const on = signMode();
+  signEl.hidden = !on;
+  petEl.style.display = on ? "none" : "";
+  if (on) updateSign();
+  sendHit(true);
+}
+
+// Clicking the sign opens the pet menu (Talk / Focus / Settings / …) just below it.
+function openSignMenu() {
+  menuEl.hidden = false;
+  const m = menuEl.getBoundingClientRect(), s = signEl.getBoundingClientRect();
+  menuEl.style.left = clamp(s.left + s.width / 2 - m.width / 2, 4, window.innerWidth - m.width - 4) + "px";
+  menuEl.style.top = clamp(s.bottom + 8, 4, window.innerHeight - m.height - 4) + "px";
+  sendHit(true);
+}
+signEl.addEventListener("click", (e) => { e.stopPropagation(); menuEl.hidden ? openSignMenu() : closeMenu(); });
+signEl.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openSignMenu(); } });
+
 // ------------------------------------------------------------ hit testing
 // The overlay is click-through except over these rectangles.
 let hold = false;
 let lastHit = "";
 function hitRects() {
   const pad = 6;
+  // Notch-sign mode: only the sign (and any open chat/menu) catch clicks.
+  if (signMode()) {
+    const rects = [];
+    for (const el of [signEl, chatEl, menuEl]) {
+      if (!el || el.hidden) continue;
+      if (el === signEl && signEl.classList.contains("tuck")) continue; // tucked = not clickable
+      const r = el.getBoundingClientRect();
+      rects.push({ x: r.left - pad, y: r.top - pad, w: r.width + pad * 2, h: r.height + pad * 2 });
+    }
+    return rects;
+  }
   // While tucked away (peek mode), the pet catches no clicks — the whole
   // overlay stays click-through so nothing underneath is blocked.
   const rects = shown > 0.6 ? [{ x: x - pad, y: petTop() - pad, w: W + pad * 2, h: H + pad * 2 }] : [];
@@ -594,6 +675,13 @@ function reflect() {
 
 function positionChat() {
   const w = 320;
+  if (signMode()) {
+    const s = signEl.getBoundingClientRect();
+    chatEl.style.left = clamp(s.left + s.width / 2 - w / 2, 8, window.innerWidth - w - 8) + "px";
+    chatEl.style.bottom = "auto";
+    chatEl.style.top = s.bottom + 10 + "px";
+    return;
+  }
   chatEl.style.left = clamp(x + W / 2 - w / 2, 8, window.innerWidth - w - 8) + "px";
   if (topMode()) {
     // Pet hangs from the top, so the chat drops down from under its feet.
@@ -759,6 +847,7 @@ listen("tick", ({ payload: p }) => {
   bedtime = !!p.bedtime;
   sessionPaused = !!p.sessionPaused;
   sessionActive = p.sessionLeft != null;
+  sessionLeft = p.sessionLeft;
   if (sessionActive) {
     badgeEl.textContent = (sessionPaused ? "❚❚ " : "") + fmt(p.sessionLeft);
     badgeEl.classList.toggle("paused", sessionPaused);
@@ -766,6 +855,7 @@ listen("tick", ({ payload: p }) => {
   } else {
     badgeEl.hidden = true;
   }
+  updateSign();   // keeps the notch sign's clock/countdown live (no-op otherwise)
 });
 // Click the countdown badge for quick focus controls.
 badgeEl.style.pointerEvents = "auto";
@@ -825,6 +915,7 @@ listen("session-done", ({ payload }) => {
   const tally = today > 0
     ? (big ? `That's ${today} today · ${streak}-day streak 🔥` : `That's ${today} today 🎉`)
     : "Nice work.";
+  signFlash(big ? "Done 🔥" : "Done 🎉", tally);
   setTimeout(() => { peekFor(PEEK.long); say(`Session done! ${tally} Take a short break.`, {
     ms: 0, alert: true,
     actions: [
@@ -840,6 +931,7 @@ listen("reminder", ({ payload: r }) => {
   touched();
   peekFor(PEEK.nudge);
   brain();
+  signFlash(r.text, "Reminder");
   say(r.text, {
     ms: 0, alert: true, small: "Reminder",
     actions: [
@@ -852,6 +944,7 @@ listen("water", () => {
   touched();
   peekFor(PEEK.nudge);
   char && char.wave(1);
+  signFlash("Time for water 💧", "Wellbeing");
   say("Time for a sip of water 💧", {
     ms: 0, alert: true,
     actions: [
@@ -867,6 +960,7 @@ listen("routine", ({ payload: r }) => {
   touched();
   peekFor(PEEK.nudge);
   brain();
+  signFlash(r.label, "Routine");
   say(r.label, {
     ms: 0, alert: true, small: "Routine",
     actions: [
@@ -900,8 +994,9 @@ listen("config-changed", ({ payload }) => {
   peekMode = !!cfg.pet.peek;
   applySize();
   const homeChanged = (cfg.pet.home || "dock") !== (wasHome || "dock");
-  if (homeChanged) { lift = 0; bob = 0; tilt = 0; sx = 1; sy = 1; x = homeX(); }
+  if (homeChanged) { lift = 0; bob = 0; tilt = 0; sx = 1; sy = 1; x = homeX(); applySignMode(); }
   if (peekMode !== wasPeek || homeChanged) { peekUntil = 0; brain(); } // re-home / resume
+  updateSign(); // refresh the sign's streak/clock after any config change
 });
 listen("character-changed", () => mountCharacter());
 listen("pet-visible", ({ payload: v }) => { if (v) brain(); });
@@ -933,11 +1028,14 @@ lift = 0;
 mode = "idle";
 setBreathe(true);
 place();
+applySignMode();
 log("pet mounted", { W, H, x, innerW: window.innerWidth, innerH: window.innerHeight });
 invoke("pet_ready", { w: window.innerWidth, h: window.innerHeight }).catch(() => {});
 requestAnimationFrame(frame);
 // In peek mode the pet stays tucked away until a nudge; no launch greeting.
-if (!peekMode) {
+if (signMode()) {
+  setTimeout(() => signFlash("Hi — tap me for options", ""), 900);
+} else if (!peekMode) {
   setTimeout(() => {
     const name = (cfg.pet.userName || "").trim();
     say(name ? `Hi ${name}! Triple-tap me to chat.` : "Hi! Triple-tap me to chat.", { ms: 5000 });

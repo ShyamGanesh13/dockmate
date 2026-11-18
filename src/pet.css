@@ -129,6 +129,71 @@ html, body {
 #chatClear[hidden] { display: none; }
 #chatClear:hover { background: #fff; }
 
+/* ---------------------------------------------------------------- notch sign
+   A carved wooden plank on two chains, hung under the menu bar. All CSS so the
+   live countdown text stays crisp at any size and in light/dark. It sways on an
+   invisible pivot a little above the plank, like it really hangs from there. */
+#sign {
+  position: fixed; top: 0; left: 50%;
+  width: 196px; margin-left: -98px;
+  pointer-events: auto; cursor: pointer;
+  transform-origin: 50% -22px;
+  animation: sway 6s ease-in-out infinite;
+  transition: top .38s cubic-bezier(.34, 1.3, .5, 1);
+  z-index: 5;
+}
+/* "Only appear for reminders": tucked up out of sight until a nudge. */
+#sign.tuck { top: -170px; pointer-events: none; }
+@keyframes sway {
+  0%, 100% { transform: rotate(-1.6deg); }
+  50% { transform: rotate(1.6deg); }
+}
+#sign .chains { position: relative; height: 22px; }
+#sign .chains i {
+  position: absolute; top: 0; width: 3px; height: 24px;
+  background: repeating-linear-gradient(#b8b4ab 0 2px, #6f6b63 2px 5px);
+  box-shadow: 0 0 1px rgba(0, 0, 0, .5);
+}
+#sign .chains i:first-child { left: 34px; transform: rotate(9deg); transform-origin: top; }
+#sign .chains i:last-child { right: 34px; transform: rotate(-9deg); transform-origin: top; }
+#sign .plank {
+  position: relative; margin-top: -2px;
+  padding: 11px 16px 13px;
+  border-radius: 9px / 12px;
+  color: #f6ecd8; text-align: center;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0 3px, rgba(255,255,255,.015) 3px 7px),
+    linear-gradient(176deg, #7a5736 0%, #624327 46%, #6e4c2d 58%, #553a21 100%);
+  border: 1px solid #3f2c18;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 228, 184, .22),
+    inset 0 -2px 3px rgba(0, 0, 0, .4),
+    0 10px 20px rgba(0, 0, 0, .3);
+}
+/* two small iron brackets where the chains meet the plank */
+#sign .plank::before, #sign .plank::after {
+  content: ""; position: absolute; top: -3px; width: 10px; height: 8px;
+  background: linear-gradient(#8a857c, #55514a); border-radius: 2px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, .5);
+}
+#sign .plank::before { left: 28px; }
+#sign .plank::after { right: 28px; }
+#sign .sign-main {
+  font: 700 20px/1.1 ui-monospace, "SF Mono", Menlo, monospace;
+  letter-spacing: .5px;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .55), 0 0 1px rgba(0, 0, 0, .4);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#sign .sign-sub {
+  margin-top: 3px; font: 600 11.5px var(--font); color: #e4cfa6;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, .5);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#sign.alert .plank { background: linear-gradient(176deg, #8a5a2e, #6b3f1c); border-color: #4a2f16; }
+#sign.alert .sign-main { font-size: 14px; }
+#sign.alert .sign-sub { color: #ffe6b8; }
+#sign:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 10px; }
+
 /* ---------------------------------------------------------------- effects */
 #fx { position: fixed; inset: 0; pointer-events: none; }
 .fx {
