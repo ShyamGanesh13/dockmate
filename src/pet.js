@@ -317,18 +317,22 @@ async function brain() {
   while (!stale(mine)) {
     if (shouldSleep()) { await doze(mine); continue; }
     const r = Math.random();
-    if (cfg.pet.wander && r < 0.4) {
+    if (cfg.pet.wander && r < 0.34) {
       // a step or two within the bottom-right zone
       const lo = roamMin(), hi = roamMax();
       const step = Math.min(Math.max(0, hi - lo), 1.2 * W);
       await walkTo(clamp(x + rand(-step, step), lo, hi), mine);
       setBreathe(true);
-    } else if (r < 0.52) {
+    } else if (r < 0.50) {
       char && char.tilt(rand(-9, 9));
-    } else if (r < 0.57) {
+    } else if (r < 0.66) {
+      await glance(mine);
+    } else if (r < 0.80) {
+      hop();
+    } else if (r < 0.85) {
       char && (await char.wave(2));
     }
-    await pause(rand(3500, 9000), mine);
+    await pause(rand(2600, 7000), mine);
   }
 }
 
@@ -419,6 +423,34 @@ function land() {
     { duration: 420, easing: "ease-out" }
   );
   setTimeout(brain, 450);
+}
+
+// A quick in-place hop with squash-and-stretch — the pet's little "I'm alive"
+// beat. Reused for celebratory reactions (session done, streak) in phase 2.
+function hop(height = 13) {
+  rigEl.animate(
+    [
+      { transform: "translateY(0) scale(1,1)" },
+      { transform: "translateY(0) scale(1.09,0.9)" },                 // crouch
+      { transform: `translateY(${-height}px) scale(0.95,1.08)` },     // leap
+      { transform: "translateY(0) scale(1.08,0.9)" },                 // land squash
+      { transform: "translateY(0) scale(1,1)" },
+    ],
+    { duration: 520, easing: "ease-out" }
+  );
+}
+
+// Glance left, then right, then recenter — a cheap "looking around" idle beat.
+// Only runs if the artwork has pupils; cursor-follow takes back over on move.
+async function glance(mine) {
+  if (!char || !char.pupils.length) return;
+  const dir = Math.random() < 0.5 ? -1 : 1;
+  char.look(dir, -0.15);
+  await pause(650, mine);
+  if (stale(mine)) return;
+  char.look(-dir * 0.7, 0.1);
+  await pause(650, mine);
+  if (!stale(mine)) char.look(0, 0);
 }
 
 async function pat(cool = true) {

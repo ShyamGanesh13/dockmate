@@ -53,10 +53,10 @@ html, body {
   pointer-events: none;
 }
 
-.breathe #rig { animation: breathe 3.2s ease-in-out infinite; }
+.breathe #rig { animation: breathe 3s ease-in-out infinite; }
 @keyframes breathe {
-  0%, 100% { transform: scale(1, 1); }
-  50% { transform: scale(0.99, 1.025); }
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  50% { transform: translateY(-1.5%) scale(0.985, 1.035); }
 }
 .sleeping #rig { animation: snooze 4.4s ease-in-out infinite; }
 @keyframes snooze {
