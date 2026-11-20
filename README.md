@@ -83,6 +83,7 @@ a native macOS notification for water, one-off and daily reminders, and session 
 ## Features
 
 - A transparent, click-through overlay that floats over other apps **and their full-screen Spaces**, on **every monitor** — one pet per display, created/removed live as you plug or unplug screens. Only the pet catches the mouse; everything else passes through to your apps.
+- **Lives where you want** (Settings → Pet → Lives): the **Dock corner** (and strolls along it), perched at the **top / notch** under the menu bar, or a **notch sign** — a little wooden card hung at the top that shows the clock, your focus countdown and nudges (with Done/Snooze buttons) instead of a face. The sign and the pet both appear on every screen.
 - **Peek mode** (default): hidden until a nudge, then slides up from the bottom-right and away again. Stays on screen through a focus session so the timer is visible.
 - Idle life (when not in peek mode): breathing, blinking, strolling the bottom-right, head tilts, waves, dozing after 5 minutes alone, eyes that follow the pointer.
 - Focus sessions with a countdown badge, pause/resume, and a chime at the end.
@@ -139,6 +140,7 @@ Tauri app) that inspired this project. The code and character here are original.
 - [x] Multiple monitors (one pet per display, live as you plug/unplug)
 - [x] Daily reminders and repeating routines
 - [x] Peek mode (hide until there's a nudge)
+- [x] Perch at the top/notch, or a wooden "notch sign" (clock + timers, no face)
 - [ ] Close distracting browser tabs on a daily budget (Chrome / Safari / Arc via AppleScript)
 - [x] GitHub Releases + a daily "update available" nudge
 - [ ] Install updates in place (no manual download)

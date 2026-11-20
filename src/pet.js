@@ -128,7 +128,17 @@ function signWantsShow() {
 }
 
 function updateSign() {
-  if (!signMode()) return;
+  const on = signMode();
+  // Single source of truth for visibility, re-asserted every tick. A window can
+  // miss the one-shot applySignMode() switch — e.g. a second-monitor overlay
+  // built/loaded mid home-change, whose get_config raced the switch, so it ran
+  // applySignMode() once with home!=="sign" and no later home-change ever un-hid
+  // it. Without this it would sit hidden forever while the tick kept writing text
+  // to it. Re-asserting here heals any such window within a second.
+  if (signEl.hidden !== !on) signEl.hidden = !on;
+  const wantPet = on ? "none" : "";
+  if (petEl.style.display !== wantPet) petEl.style.display = wantPet;
+  if (!on) return;
   const wasTucked = signEl.classList.contains("tuck");
   const tuck = !signWantsShow();
   signEl.classList.toggle("tuck", tuck);
