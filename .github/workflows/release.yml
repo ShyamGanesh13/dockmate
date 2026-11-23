@@ -1,5 +1,11 @@
 # Push a tag like v0.2.0 (scripts/release.sh does it) → GitHub builds Dockmate
-# for Apple Silicon and publishes Dockmate.zip on the Releases page.
+# for Apple Silicon and publishes it on the Releases page:
+#   • Dockmate.zip            — manual download / first install
+#   • Dockmate.app.tar.gz(+.sig) + latest.json — the in-app auto-updater
+#
+# Signing needs one repo secret: TAURI_SIGNING_PRIVATE_KEY (the contents of the
+# updater private key). TAURI_SIGNING_PRIVATE_KEY_PASSWORD is optional (empty if
+# the key has no password). The matching public key is in tauri.conf.json.
 name: Release
 
 on:
@@ -11,7 +17,10 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-latest # GitHub-hosted Apple Silicon
+    runs-on: macos-latest # GitHub-hosted Apple Silicon (arm64)
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
     steps:
       - uses: actions/checkout@v7
 
@@ -20,6 +29,10 @@ jobs:
           want="${GITHUB_REF_NAME#v}"
           have=$(node -p "require('./src-tauri/tauri.conf.json').version")
           [ "$want" = "$have" ] || { echo "Tag $GITHUB_REF_NAME but tauri.conf.json says $have. Use scripts/release.sh."; exit 1; }
+
+      - name: Fail early if the signing key is missing
+        run: |
+          [ -n "$TAURI_SIGNING_PRIVATE_KEY" ] || { echo "Missing secret TAURI_SIGNING_PRIVATE_KEY — add it in repo Settings → Secrets → Actions."; exit 1; }
 
       - uses: actions/setup-node@v7
         with:
@@ -34,18 +47,46 @@ jobs:
 
       - run: npm ci
 
+      # createUpdaterArtifacts (tauri.conf.json) makes this also emit
+      # Dockmate.app.tar.gz and Dockmate.app.tar.gz.sig next to the .app.
       - run: npx tauri build --bundles app
 
-      - name: Zip the app
+      - name: Zip the app (manual-install fallback)
         run: ditto -c -k --keepParent src-tauri/target/release/bundle/macos/Dockmate.app Dockmate.zip
+
+      - name: Build the updater manifest (latest.json)
+        run: |
+          BUNDLE=src-tauri/target/release/bundle/macos
+          export V="${GITHUB_REF_NAME#v}"
+          export SIG="$(cat "$BUNDLE/Dockmate.app.tar.gz.sig")"
+          export URL="https://github.com/ShyamGanesh13/dockmate/releases/download/${GITHUB_REF_NAME}/Dockmate.app.tar.gz"
+          node -e '
+            const fs = require("fs");
+            const manifest = {
+              version: process.env.V,
+              notes: "See the release notes on GitHub.",
+              pub_date: new Date().toISOString(),
+              platforms: {
+                "darwin-aarch64": { signature: process.env.SIG, url: process.env.URL }
+              }
+            };
+            fs.writeFileSync("latest.json", JSON.stringify(manifest, null, 2));
+          '
+          echo "--- latest.json ---"; cat latest.json
 
       - uses: softprops/action-gh-release@v3
         with:
-          files: Dockmate.zip
+          files: |
+            Dockmate.zip
+            src-tauri/target/release/bundle/macos/Dockmate.app.tar.gz
+            latest.json
           body: |
             **Apple Silicon Macs (M1 and later).**
 
-            ### Install or update
+            ### Already on Dockmate 0.2.15 or newer?
+            It updates itself — Pip shows an **Update** bubble; click **Install & relaunch**.
+
+            ### First install (or coming from an older version)
             1. Quit Dockmate if it's running (menu-bar icon → Quit).
             2. Download **Dockmate.zip** below and double-click it to unzip.
             3. Drag **Dockmate.app** into **Applications** (choose *Replace* if asked).

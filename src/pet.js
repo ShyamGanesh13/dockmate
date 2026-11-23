@@ -1013,7 +1013,19 @@ listen("update-available", ({ payload: u }) => {
   say(`Dockmate ${u.version} is out!`, {
     ms: 0, alert: true, small: "Update",
     actions: [
-      { label: "Download", act: () => invoke("open_release", { url: u.url }) },
+      {
+        label: "Install & relaunch",
+        act: () => {
+          say("Downloading update…", { ms: 0, alert: true, small: "Update" });
+          invoke("install_update").catch(() => {
+            say("Update failed to install.", {
+              ms: 0, alert: true, small: "Update",
+              actions: [{ label: "Open download page", act: () => invoke("open_release", { url: u.url }) }],
+            });
+          });
+          // On success the app relaunches into the new build, so no UI to update here.
+        },
+      },
       { label: "Later", act: () => {} },
     ],
   });

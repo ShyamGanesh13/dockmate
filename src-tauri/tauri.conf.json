@@ -32,8 +32,17 @@
       "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' ipc: http://ipc.localhost"
     }
   },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDZFNzNDRjdBOEU4MzY4MjYKUldRbWFJT09lczl6YnV2cVFJNXJQNzBCdThObEdNUDBDZ2VMVjh2K0orenlCemRaUmFXUUtGalEK",
+      "endpoints": [
+        "https://github.com/ShyamGanesh13/dockmate/releases/latest/download/latest.json"
+      ]
+    }
+  },
   "bundle": {
     "active": true,
+    "createUpdaterArtifacts": true,
     "targets": ["app"],
     "category": "Productivity",
     "shortDescription": "A desktop companion that lives above your Dock",

@@ -17,6 +17,7 @@ use tauri_plugin_autostart::MacosLauncher;
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, None))
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .setup(|app| {
             // A desk pet, not an app you switch to: no Dock icon, menu-bar only.
             #[cfg(target_os = "macos")]
@@ -73,6 +74,7 @@ fn main() {
             commands::quit_app,
             commands::app_version,
             commands::open_release,
+            commands::install_update,
             commands::autostart_get,
             commands::autostart_set,
             commands::get_character,

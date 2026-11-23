@@ -269,6 +269,20 @@ pub fn open_release(url: String) -> Result<(), String> {
     std::process::Command::new("open").arg(&url).spawn().map(|_| ()).map_err(|e| e.to_string())
 }
 
+/// Download, verify (minisign) and install the latest release, then relaunch.
+/// The pet's "Install & relaunch" button calls this; on any error it returns a
+/// message so the pet can fall back to the manual download page.
+#[tauri::command]
+pub async fn install_update(app: AppHandle) -> Result<(), String> {
+    use tauri_plugin_updater::UpdaterExt;
+    let update = app.updater().map_err(|e| e.to_string())?.check().await.map_err(|e| e.to_string())?;
+    if let Some(update) = update {
+        update.download_and_install(|_received, _total| {}, || {}).await.map_err(|e| e.to_string())?;
+        app.restart(); // diverges: relaunches into the freshly installed build
+    }
+    Ok(()) // already current — nothing to do
+}
+
 #[tauri::command]
 pub fn autostart_get(app: AppHandle) -> bool {
     app.autolaunch().is_enabled().unwrap_or(false)

@@ -21,6 +21,15 @@ DIR="$HOME/Applications"
 DEST="$DIR/$APP_NAME"
 
 echo "▶ Building $APP_NAME (release) — this takes a few minutes the first time…"
+# The build signs its updater artifacts (createUpdaterArtifacts in tauri.conf.json).
+# Load the local signing key if it's there so the build succeeds; CI uses a secret.
+KEYFILE="$HOME/.tauri/dockmate_updater.key"
+if [ -f "$KEYFILE" ]; then
+  export TAURI_SIGNING_PRIVATE_KEY="$(cat "$KEYFILE")"
+  export TAURI_SIGNING_PRIVATE_KEY_PASSWORD="${TAURI_SIGNING_PRIVATE_KEY_PASSWORD:-}"
+else
+  echo "  (no updater signing key at $KEYFILE — see the updater notes if the build fails here)"
+fi
 # Only the .app is needed to install; the .dmg step is slow and flaky (hdiutil "Resource busy").
 npx tauri build --bundles app
 
