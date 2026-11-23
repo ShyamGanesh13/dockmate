@@ -59,6 +59,7 @@ fn main() {
             commands::list_notes,
             commands::add_note,
             commands::delete_note,
+            commands::clear_notes,
             commands::status,
             commands::start_session,
             commands::stop_session,

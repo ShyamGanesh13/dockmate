@@ -51,10 +51,33 @@ function fill() {
   for (const [id, prop, get] of binds) $(id)[prop] = get();
   $("scaleOut").textContent = Number(cfg.pet.scale).toFixed(2) + "×";
   $("speedOut").textContent = Number(cfg.pet.speed).toFixed(2) + "×";
+  syncSegs();
   renderReminders();
   renderRoutines();
   renderDaily();
 }
+
+// Segmented controls are a nicer face for a hidden <select> (the "Lives"
+// picker). The select stays the source of truth, so every existing binding,
+// save, and config-changed sync keeps working untouched.
+function syncSegs() {
+  document.querySelectorAll(".seg[data-seg]").forEach((seg) => {
+    const sel = $(seg.dataset.seg);
+    if (!sel) return;
+    seg.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.val === sel.value));
+  });
+}
+document.querySelectorAll(".seg[data-seg]").forEach((seg) => {
+  seg.addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-val]");
+    if (!b) return;
+    const sel = $(seg.dataset.seg);
+    if (sel.value === b.dataset.val) return;
+    sel.value = b.dataset.val;
+    sel.dispatchEvent(new Event("change")); // runs the existing bind → saves
+    syncSegs();
+  });
+});
 
 for (const [id, prop, , set] of binds) {
   const el = $(id);
@@ -228,6 +251,7 @@ function renderReminders() {
   const past = rows.filter(isPast).length;
   $("remClear").hidden = past === 0;
   $("remClear").textContent = `Clear past (${past})`;
+  $("remClearAll").hidden = rows.length === 0;
   if (!rows.length) {
     const e = document.createElement("div");
     e.className = "empty";
@@ -253,6 +277,14 @@ function renderReminders() {
 }
 $("remClear").addEventListener("click", () => {
   cfg.reminders = cfg.reminders.filter((r) => !isPast(r));
+  save();
+  renderReminders();
+});
+$("remClearAll").addEventListener("click", () => {
+  const n = cfg.reminders.length;
+  if (!n) return;
+  if (!confirm(`Delete all ${n} reminder${n === 1 ? "" : "s"}? This can't be undone.`)) return;
+  cfg.reminders = [];
   save();
   renderReminders();
 });
@@ -368,6 +400,7 @@ async function renderNotes() {
   const notes = await invoke("list_notes");
   const list = $("noteList");
   list.replaceChildren();
+  $("noteClear").hidden = notes.length === 0;
   if (!notes.length) {
     const e = document.createElement("div");
     e.className = "empty";
@@ -392,6 +425,11 @@ async function renderNotes() {
     list.appendChild(item);
   }
 }
+$("noteClear").addEventListener("click", async () => {
+  if (!confirm("Delete all notes? This can't be undone.")) return;
+  await invoke("clear_notes");
+  renderNotes();
+});
 listen("notes-changed", () => renderNotes());
 
 // ------------------------------------------------------------ general

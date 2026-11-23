@@ -9,13 +9,13 @@
 <body>
   <nav id="tabs" role="tablist">
     <div class="brand"><span class="dot"></span>Dockmate</div>
-    <button role="tab" data-tab="pet" class="on">Pet</button>
-    <button role="tab" data-tab="character">Character</button>
-    <button role="tab" data-tab="focus">Focus</button>
-    <button role="tab" data-tab="reminders">Reminders</button>
-    <button role="tab" data-tab="notes">Notes</button>
-    <button role="tab" data-tab="wellbeing">Wellbeing</button>
-    <button role="tab" data-tab="general">General</button>
+    <button role="tab" data-tab="pet" class="on"><span class="ti">🐾</span>Pet</button>
+    <button role="tab" data-tab="character"><span class="ti">🎨</span>Character</button>
+    <button role="tab" data-tab="focus"><span class="ti">⏳</span>Focus</button>
+    <button role="tab" data-tab="reminders"><span class="ti">⏰</span>Reminders</button>
+    <button role="tab" data-tab="notes"><span class="ti">📝</span>Notes</button>
+    <button role="tab" data-tab="wellbeing"><span class="ti">🌿</span>Wellbeing</button>
+    <button role="tab" data-tab="general"><span class="ti">⚙️</span>General</button>
     <div class="saved" id="saved" aria-live="polite"></div>
   </nav>
 
@@ -23,35 +23,55 @@
     <!-- PET -->
     <section data-panel="pet" class="on">
       <h1>Pet</h1>
-      <label class="row"><span>Your name<small>Used when you say hi.</small></span>
-        <input id="userName" type="text" maxlength="40" placeholder="e.g. Shyam"></label>
-      <label class="row"><span>Size</span>
-        <span class="range"><input id="scale" type="range" min="0.5" max="2" step="0.05"><output id="scaleOut"></output></span></label>
-      <label class="row"><span>Speed</span>
-        <span class="range"><input id="speed" type="range" min="0.5" max="2" step="0.05"><output id="speedOut"></output></span></label>
-      <label class="row"><span>Lives<small>Where it sits. “Top / notch” perches the pet at top-centre; “Notch sign” hangs a wooden status sign there instead (clock, focus timer, streak — no face).</small></span>
-        <select id="home"><option value="dock">Dock corner</option><option value="top">Top / notch (pet)</option><option value="sign">Notch sign</option></select></label>
-      <label class="row check"><input id="peek" type="checkbox"><span>Only appear for reminders<small>Stay tucked away and slide out only when there's a nudge.</small></span></label>
-      <label class="row check"><input id="wander" type="checkbox"><span>Wander along the Dock<small>Ignored while “only appear for reminders” is on.</small></span></label>
-      <label class="row check"><input id="sleepy" type="checkbox"><span>Doze off when left alone (5 min)</span></label>
-      <label class="row check"><input id="follow" type="checkbox"><span>Eyes follow the mouse<small>Needs a <code>pupil</code> part in the SVG.</small></span></label>
-      <label class="row"><span>Weather city<small>For “weather?” — or ask “weather in Mumbai?”</small></span>
-        <input id="city" type="text" maxlength="80" placeholder="e.g. Chennai"></label>
+      <div class="card">
+        <label class="row"><span>Your name</span>
+          <input id="userName" type="text" maxlength="40" placeholder="e.g. Shyam"></label>
+        <div class="row"><span>Lives<small>Where it sits.</small></span>
+          <div class="seg" data-seg="home" role="group" aria-label="Where the pet lives">
+            <button type="button" data-val="dock">Dock</button>
+            <button type="button" data-val="top">Top / notch</button>
+            <button type="button" data-val="sign">Notch sign</button>
+          </div>
+          <select id="home" class="visually-hidden" tabindex="-1" aria-hidden="true">
+            <option value="dock">Dock corner</option>
+            <option value="top">Top / notch (pet)</option>
+            <option value="sign">Notch sign</option>
+          </select></div>
+        <label class="row"><span>Size</span>
+          <span class="range"><input id="scale" type="range" min="0.5" max="2" step="0.05"><output id="scaleOut"></output></span></label>
+        <label class="row"><span>Speed</span>
+          <span class="range"><input id="speed" type="range" min="0.5" max="2" step="0.05"><output id="speedOut"></output></span></label>
+      </div>
+
+      <h2 class="sub">Behaviour</h2>
+      <div class="card">
+        <label class="row check"><input id="peek" type="checkbox"><span>Only appear for reminders</span></label>
+        <label class="row check"><input id="wander" type="checkbox"><span>Wander along the Dock</span></label>
+        <label class="row check"><input id="sleepy" type="checkbox"><span>Doze off when left alone (5 min)</span></label>
+        <label class="row check"><input id="follow" type="checkbox"><span>Eyes follow the mouse</span></label>
+      </div>
+
+      <h2 class="sub">Weather</h2>
+      <div class="card">
+        <label class="row"><span>City<small>For “weather?”</small></span>
+          <input id="city" type="text" maxlength="80" placeholder="e.g. Chennai"></label>
+      </div>
     </section>
 
     <!-- CHARACTER -->
     <section data-panel="character">
       <h1>Character</h1>
-      <p class="lead">Use any SVG, PNG or JPG as your pet (a plain or checkerboard background is removed for you). It walks, breathes, hops and sleeps as-is.
-        Name groups in your SVG to unlock extra moves — see <code>docs/CHARACTER_SVG.md</code>.</p>
-      <div class="charbox">
-        <div id="charPreview"></div>
-        <div>
-          <p class="found" id="charParts"></p>
-          <p class="err" id="charErr" hidden></p>
-          <div class="btns">
-            <label class="btn primary">Choose image…<input id="charFile" type="file" accept=".svg,image/svg+xml,image/png,image/jpeg" hidden></label>
-            <button class="btn" id="charReset" type="button">Use default</button>
+      <p class="lead">Any SVG, PNG or JPG becomes your pet — it walks, breathes and sleeps as-is. Name groups in an SVG to unlock extra moves (see <code>docs/CHARACTER_SVG.md</code>).</p>
+      <div class="card flush">
+        <div class="charbox">
+          <div id="charPreview"></div>
+          <div>
+            <p class="found" id="charParts"></p>
+            <p class="err" id="charErr" hidden></p>
+            <div class="btns">
+              <label class="btn primary">Choose image…<input id="charFile" type="file" accept=".svg,image/svg+xml,image/png,image/jpeg" hidden></label>
+              <button class="btn" id="charReset" type="button">Use default</button>
+            </div>
           </div>
         </div>
       </div>
@@ -60,12 +80,14 @@
     <!-- FOCUS -->
     <section data-panel="focus">
       <h1>Focus</h1>
-      <label class="row"><span>Session length<small>Minutes. Also: type /timer 50 in the chat.</small></span>
-        <input id="sessionMinutes" type="number" min="1" max="600"></label>
-      <label class="row check"><input id="chimeOn" type="checkbox"><span>Chime when a session ends</span></label>
-      <div class="row"><span id="sessionState">No session running.</span>
-        <span class="btns"><button class="btn primary" id="sessionStart" type="button">Start</button>
-        <button class="btn" id="sessionStop" type="button">Stop</button></span></div>
+      <div class="card">
+        <label class="row"><span>Session length<small>Minutes. Or <code>/timer 50</code> in chat.</small></span>
+          <input id="sessionMinutes" type="number" min="1" max="600"></label>
+        <label class="row check"><input id="chimeOn" type="checkbox"><span>Chime when a session ends</span></label>
+        <div class="row"><span id="sessionState">No session running.</span>
+          <span class="btns"><button class="btn primary" id="sessionStart" type="button">Start</button>
+          <button class="btn" id="sessionStop" type="button">Stop</button></span></div>
+      </div>
     </section>
 
     <!-- REMINDERS -->
@@ -76,35 +98,45 @@
       <div class="btns">
         <button class="btn" id="remAdd" type="button">+ Add reminder</button>
         <button class="btn danger" id="remClear" type="button" hidden>Clear past</button>
+        <button class="btn danger" id="remClearAll" type="button" hidden>Clear all</button>
       </div>
     </section>
 
     <!-- NOTES -->
     <section data-panel="notes">
       <h1>Notes</h1>
-      <p class="lead">Anything you type in the chat that isn’t a question or a /command lands here, newest first.</p>
+      <p class="lead">Chat text that isn’t a question or a /command lands here, newest first.</p>
       <div id="noteList" class="list"></div>
+      <div class="btns">
+        <button class="btn danger" id="noteClear" type="button" hidden>Clear all notes</button>
+      </div>
     </section>
 
     <!-- WELLBEING -->
     <section data-panel="wellbeing">
       <h1>Wellbeing</h1>
-      <label class="row check"><input id="waterOn" type="checkbox"><span>Water reminders</span></label>
-      <label class="row"><span>Every<small>Minutes (paused during focus sessions).</small></span>
-        <input id="waterEvery" type="number" min="5" max="480"></label>
-      <label class="row check"><input id="bedOn" type="checkbox"><span>Bedtime — the pet says goodnight and sleeps</span></label>
-      <div class="row"><span>From / to</span>
-        <span class="btns"><input id="bedFrom" type="time"><input id="bedTo" type="time"></span></div>
+
+      <h2 class="sub">Water</h2>
+      <div class="card">
+        <label class="row check"><input id="waterOn" type="checkbox"><span>Water reminders</span></label>
+        <label class="row"><span>Every<small>Minutes · paused during focus.</small></span>
+          <input id="waterEvery" type="number" min="5" max="480"></label>
+      </div>
+
+      <h2 class="sub">Bedtime</h2>
+      <div class="card">
+        <label class="row check"><input id="bedOn" type="checkbox"><span>The pet says goodnight and sleeps</span></label>
+        <div class="row"><span>From / to</span>
+          <span class="btns"><input id="bedFrom" type="time"><input id="bedTo" type="time"></span></div>
+      </div>
 
       <h2 class="sub">Repeating routines</h2>
-      <p class="lead">Recurring nudges like “stand and stretch”. Or type
-        <code>/every 2h stand and stretch</code> in the chat. Leave the times blank for all day.</p>
+      <p class="lead">Recurring nudges — or type <code>/every 2h stand and stretch</code>. Blank times = all day.</p>
       <div id="routineList" class="list"></div>
       <button class="btn" id="routineAdd" type="button">+ Add routine</button>
 
       <h2 class="sub">Daily reminders</h2>
-      <p class="lead">Same time every day — like “11:30 have chia seeds”. Or type
-        <code>/daily 3:30pm ABC milk</code> in the chat.</p>
+      <p class="lead">Same time daily — or type <code>/daily 3:30pm ABC milk</code>.</p>
       <div id="dailyList" class="list"></div>
       <button class="btn" id="dailyAdd" type="button">+ Add daily reminder</button>
     </section>
@@ -112,13 +144,15 @@
     <!-- GENERAL -->
     <section data-panel="general">
       <h1>General</h1>
-      <label class="row check"><input id="autostart" type="checkbox"><span>Open at login</span></label>
-      <div class="row"><span>Pet</span><span class="btns">
-        <button class="btn" id="showPet" type="button">Show</button>
-        <button class="btn" id="hidePet" type="button">Hide</button></span></div>
-      <div class="row"><span>Version</span><span id="version" class="muted"></span></div>
-      <div class="row"><span>Data</span><span class="muted">Settings and notes stay on this Mac. Only “weather?” uses the internet (Open-Meteo).</span></div>
-      <div class="row"><span></span><button class="btn danger" id="quit" type="button">Quit Dockmate</button></div>
+      <div class="card">
+        <label class="row check"><input id="autostart" type="checkbox"><span>Open at login</span></label>
+        <div class="row"><span>Pet</span><span class="btns">
+          <button class="btn" id="showPet" type="button">Show</button>
+          <button class="btn" id="hidePet" type="button">Hide</button></span></div>
+        <div class="row"><span>Version</span><span id="version" class="muted"></span></div>
+        <div class="row"><span>Data<small>Everything stays on this Mac; only “weather?” goes online.</small></span></div>
+      </div>
+      <div class="btns"><button class="btn danger" id="quit" type="button">Quit Dockmate</button></div>
     </section>
   </main>
 

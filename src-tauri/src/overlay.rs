@@ -403,8 +403,8 @@ pub fn open_settings(app: &AppHandle) {
     }
     let built = WebviewWindowBuilder::new(app, "settings", WebviewUrl::App("settings.html".into()))
         .title("Dockmate Settings")
-        .inner_size(620.0, 680.0)
-        .min_inner_size(520.0, 520.0)
+        .inner_size(760.0, 700.0)
+        .min_inner_size(600.0, 540.0)
         .center()
         .focused(true)
         .build();

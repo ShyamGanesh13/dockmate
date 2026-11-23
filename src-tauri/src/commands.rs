@@ -102,6 +102,17 @@ pub fn delete_note(app: AppHandle, state: State<AppState>, id: u64) -> Vec<Note>
     list_notes(state)
 }
 
+#[tauri::command]
+pub fn clear_notes(app: AppHandle, state: State<AppState>) -> Vec<Note> {
+    {
+        let mut notes = state.notes.lock().unwrap();
+        notes.clear();
+        state.save_notes(&notes);
+    }
+    let _ = app.emit("notes-changed", ());
+    list_notes(state)
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Status {
